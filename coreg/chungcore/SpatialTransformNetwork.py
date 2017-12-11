@@ -1,7 +1,7 @@
 from keras.layers.core import Layer
-import tensorflow as tf
 from keras.layers import MaxPooling2D, Conv2D, Dense, Activation, Flatten
 from keras.models import Sequential
+import tensorflow as tf
 
 
 def locNet(input_shape):

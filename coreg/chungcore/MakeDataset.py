@@ -1,6 +1,6 @@
-import bcolz
 import glob
 import os
+import bcolz
 import numpy as np
 
 
@@ -8,7 +8,8 @@ def save_array(fname, arr): c = bcolz.carray(
     arr, rootdir=fname, mode='w'); c.flush()
 
 
-def load_array(fname): return bcolz.open(fname)[:]
+def load_array(fname):
+    return bcolz.open(fname)[:]
 
 
 def normalize(X):

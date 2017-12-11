@@ -1,7 +1,7 @@
+import os
 import numpy as np
 from ConvAutoencoder import ConvAutoEncoder2D
 from MakeDataset import save_array, normalize, load_array
-import os
 
 # User input
 ProcessedDirectory = r'D:\analysis\data\processed\Coreg_test\X.bc'

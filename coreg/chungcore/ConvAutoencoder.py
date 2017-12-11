@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from keras import regularizers
 
 '''
-Module that introduces a convolutional autoencoder 
+Module that introduces a convolutional autoencoder
 '''
 
 
@@ -71,11 +71,11 @@ class ConvAutoEncoder2D(object):
         model = self.getAutoencoder(inputs)
         model_checkpoint = ModelCheckpoint(
             self.ModelFile, monitor='val_loss', verbose=1, save_best_only=True, save_weights_only=True)
+        # X is the input and also the output
         model.fit(X, X, batch_size=1, epochs=10, shuffle=True, verbose=1,
                   validation_split=0.2, callbacks=[model_checkpoint])
 
     def predictModel(self, datas, imageSink=None):
-
         inputs = Input((self.img_rows, self.img_cols, 1))
         model = self.getAutoencoder(inputs)
         model.load_weights(self.ModelFile)
