@@ -1,20 +1,21 @@
 from keras.layers.core import Layer
 import tensorflow as tf
-from keras.layers import MaxPooling2D, Conv2D, Dense, Activation, Flatten  
-from keras.models import Sequential 
+from keras.layers import MaxPooling2D, Conv2D, Dense, Activation, Flatten
+from keras.models import Sequential
+
 
 def locNet(input_shape):
     locnet = Sequential()
-    locnet.add(MaxPooling2D(pool_size=(2,2), input_shape=input_shape))
-    locnet.add(Conv2D(8, (3,3), kernel_initializer='he_normal'))
-    locnet.add(MaxPooling2D(pool_size=(2,2)))
-    locnet.add(Conv2D(8, (3,3), kernel_initializer='he_normal'))
+    locnet.add(MaxPooling2D(pool_size=(2, 2), input_shape=input_shape))
+    locnet.add(Conv2D(8, (3, 3), kernel_initializer='he_normal'))
+    locnet.add(MaxPooling2D(pool_size=(2, 2)))
+    locnet.add(Conv2D(8, (3, 3), kernel_initializer='he_normal'))
 
     locnet.add(Flatten())
     locnet.add(Dense(50, activation='relu', kernel_initializer='he_normal'))
     locnet.add(Dense(6, kernel_initializer='he_normal'))
-    return locnet 
-    
+    return locnet
+
 
 class SpatialTransformer(Layer):
     """Spatial Transformer Layer
@@ -48,7 +49,7 @@ class SpatialTransformer(Layer):
     def build(self, input_shape):
         self.locnet.build(input_shape)
         self.trainable_weights = self.locnet.trainable_weights
-        #self.regularizers = self.locnet.regularizers //NOT SUER ABOUT THIS, THERE IS NO MORE SUCH PARAMETR AT self.locnet
+        # self.regularizers = self.locnet.regularizers //NOT SUER ABOUT THIS, THERE IS NO MORE SUCH PARAMETR AT self.locnet
         self.constraints = self.locnet.constraints
 
     def compute_output_shape(self, input_shape):
@@ -65,7 +66,7 @@ class SpatialTransformer(Layer):
 
     def _repeat(self, x, num_repeats):
         ones = tf.ones((1, num_repeats), dtype='int32')
-        x = tf.reshape(x, shape=(-1,1))
+        x = tf.reshape(x, shape=(-1, 1))
         x = tf.matmul(x, ones)
         return tf.reshape(x, [-1])
 
@@ -75,17 +76,17 @@ class SpatialTransformer(Layer):
         width = tf.shape(image)[2]
         num_channels = tf.shape(image)[3]
 
-        x = tf.cast(x , dtype='float32')
-        y = tf.cast(y , dtype='float32')
+        x = tf.cast(x, dtype='float32')
+        y = tf.cast(y, dtype='float32')
 
         height_float = tf.cast(height, dtype='float32')
         width_float = tf.cast(width, dtype='float32')
 
         output_height = output_size[0]
-        output_width  = output_size[1]
+        output_width = output_size[1]
 
-        x = .5*(x + 1.0)*(width_float)
-        y = .5*(y + 1.0)*(height_float)
+        x = .5 * (x + 1.0) * (width_float)
+        y = .5 * (y + 1.0) * (height_float)
 
         x0 = tf.cast(tf.floor(x), 'int32')
         x1 = x0 + 1
@@ -101,12 +102,12 @@ class SpatialTransformer(Layer):
         y0 = tf.clip_by_value(y0, zero, max_y)
         y1 = tf.clip_by_value(y1, zero, max_y)
 
-        flat_image_dimensions = width*height
-        pixels_batch = tf.range(batch_size)*flat_image_dimensions
-        flat_output_dimensions = output_height*output_width
+        flat_image_dimensions = width * height
+        pixels_batch = tf.range(batch_size) * flat_image_dimensions
+        flat_output_dimensions = output_height * output_width
         base = self._repeat(pixels_batch, flat_output_dimensions)
-        base_y0 = base + y0*width
-        base_y1 = base + y1*width
+        base_y0 = base + y0 * width
+        base_y1 = base + y1 * width
         indices_a = base_y0 + x0
         indices_b = base_y1 + x0
         indices_c = base_y0 + x1
@@ -128,10 +129,10 @@ class SpatialTransformer(Layer):
         area_b = tf.expand_dims(((x1 - x) * (y - y0)), 1)
         area_c = tf.expand_dims(((x - x0) * (y1 - y)), 1)
         area_d = tf.expand_dims(((x - x0) * (y - y0)), 1)
-        output = tf.add_n([area_a*pixel_values_a,
-                           area_b*pixel_values_b,
-                           area_c*pixel_values_c,
-                           area_d*pixel_values_d])
+        output = tf.add_n([area_a * pixel_values_a,
+                           area_b * pixel_values_b,
+                           area_c * pixel_values_c,
+                           area_d * pixel_values_d])
         return output
 
     def _meshgrid(self, height, width):
@@ -150,7 +151,8 @@ class SpatialTransformer(Layer):
         width = tf.shape(input_shape)[2]
         num_channels = tf.shape(input_shape)[3]
 
-        affine_transformation = tf.reshape(affine_transformation, shape=(batch_size,2,3))
+        affine_transformation = tf.reshape(
+            affine_transformation, shape=(batch_size, 2, 3))
 
         affine_transformation = tf.reshape(affine_transformation, (-1, 2, 3))
         affine_transformation = tf.cast(affine_transformation, 'float32')
@@ -161,7 +163,7 @@ class SpatialTransformer(Layer):
         output_width = output_size[1]
         indices_grid = self._meshgrid(output_height, output_width)
         indices_grid = tf.expand_dims(indices_grid, 0)
-        indices_grid = tf.reshape(indices_grid, [-1]) # flatten?
+        indices_grid = tf.reshape(indices_grid, [-1])  # flatten?
 
         indices_grid = tf.tile(indices_grid, tf.stack([batch_size]))
         indices_grid = tf.reshape(indices_grid, (batch_size, 3, -1))
@@ -173,13 +175,12 @@ class SpatialTransformer(Layer):
         y_s_flatten = tf.reshape(y_s, [-1])
 
         transformed_image = self._interpolate(input_shape,
-                                                x_s_flatten,
-                                                y_s_flatten,
-                                                output_size)
+                                              x_s_flatten,
+                                              y_s_flatten,
+                                              output_size)
 
         transformed_image = tf.reshape(transformed_image, shape=(batch_size,
-                                                                output_height,
-                                                                output_width,
-                                                                num_channels))
+                                                                 output_height,
+                                                                 output_width,
+                                                                 num_channels))
         return transformed_image
-        
