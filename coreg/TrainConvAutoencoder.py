@@ -10,9 +10,7 @@ import config
 
 def get_files(dir):
     for root, dirs, files in os.walk(config.image_1_dir):
-        for filename in files:
-            print(filename)
-        return files
+        return [os.path.join(config.image_1_dir, fn) for fn in files]
 
 
 def concatenate_images(image_1_filename, image_2_filename, i):
@@ -25,9 +23,13 @@ def concatenate_images(image_1_filename, image_2_filename, i):
     X = np.expand_dims(image, axis=3)
     return image
 
+
 # image 1
 images_1 = get_files(config.image_1_dir)
 images_2 = get_files(config.image_2_dir)
+
+print('images1', images_1)
+print('images2', images_2)
 
 concatenated_filename = config.processed_dir + '/concatenated'
 
@@ -59,4 +61,3 @@ mynet.train(X)
 #     X = np.expand_dims(image, axis=3)
 #     save_array(ProcessedDirectory, X)
 # else:
-
