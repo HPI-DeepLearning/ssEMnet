@@ -7,7 +7,6 @@ from ConvAutoencoder import ConvAutoEncoder2D
 from MakeDataset import save_array, normalize, load_array
 import config
 
-print(config)
 
 def get_files(dir):
     for root, dirs, files in os.walk(config.image_1_dir):
