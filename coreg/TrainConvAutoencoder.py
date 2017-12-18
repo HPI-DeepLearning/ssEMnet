@@ -24,6 +24,10 @@ def concatenate_images(image_1_filename, image_2_filename, i):
     # X = np.expand_dims(image, axis=3)
     return image
 
+def read_images(image_filename):
+    print(image_filename)
+    return io.imread(image_filename)
+
 
 # image 1
 images_1 = get_files(config.image_1_dir)
@@ -37,9 +41,11 @@ concatenated_filename = os.path.join(config.processed_dir, 'concatenated')
 if os.path.isfile(concatenated_filename):
     X = load_array(concatenated_filename)
 else:
-    X = np.empty((len(images_1), 28, 28 * 2));
+    # X = np.empty((len(images_1), 28, 28 * 2));
+    X = np.empty((len(images_1), 28, 28))
     for i in range(len(images_1)):
-        X[i] = concatenate_images(images_1[i], images_2[i], i)
+        # X[i] = concatenate_images(images_1[i], images_2[i], i)
+        X[i] = read_images(images_1[i])
     X = np.expand_dims(X, axis=3)
     if not os.path.exists(concatenated_filename):
         os.makedirs(concatenated_filename)
@@ -50,7 +56,8 @@ print(X.shape)
 checkpoint_filename = os.path.join(config.checkpoint_dir, 'mynet')
 
 # Train
-mynet = ConvAutoEncoder2D(checkpoint_filename, X.shape[1], X.shape[2])
+mynet = ConvAutoEncoder2D(
+    checkpoint_filename, X.shape[1], X.shape[2], encoding_decoding_choice=1)
 mynet.train(X)
 
 
