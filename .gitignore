@@ -1,4 +1,6 @@
 .vscode
+.DS_Store
+.idea/
 
 # from https://github.com/github/gitignore/blob/master/Python.gitignore
 
