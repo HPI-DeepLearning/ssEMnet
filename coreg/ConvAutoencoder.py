@@ -18,10 +18,11 @@ Module that introduces a convolutional autoencoder
 
 
 class ConvAutoEncoder2D(object):
-    def __init__(self, ModelFile, img_rows, img_cols):
+    def __init__(self, ModelFile, img_rows, img_cols, encoding_decoding_choice=None):
         self.img_rows = img_rows
         self.img_cols = img_cols
         self.ModelFile = ModelFile
+        self.encoding_decoding_choice = encoding_decoding_choice
 
     def encode(self, inputs, layer_start_index):
         # layer_starT_index is so we can identify the layers by name in ssSEMnet: input is the starting index for which we wish to name
@@ -30,7 +31,7 @@ class ConvAutoEncoder2D(object):
             map(str, list(range(layer_start_index, layer_start_index + 6))))
         names = []
         for element in indices:
-            names.append('encode' + element)
+            names.append('encode_' + element)
         encoded = Conv2D(32, (3, 3), activation='relu', padding='same',
                          kernel_regularizer=regularizers.l2(1e-3), name=names[0])(inputs)
         encoded = MaxPooling2D((2, 2), name=names[1])(encoded)
@@ -43,22 +44,59 @@ class ConvAutoEncoder2D(object):
         return encoded
 
     def decode(self, encoded_input):
+        indices = list(map(str, list(range(7))))
+        names = []
+        for element in indices:
+            names.append('decode_' + element)
+
         decoded = Conv2D(128, (3, 3), activation='relu', padding='same',
-                         kernel_regularizer=regularizers.l2(1e-3))(encoded_input)
-        decoded = UpSampling2D((2, 2))(decoded)
+                         kernel_regularizer=regularizers.l2(1e-3), name=names[0])(encoded_input)
+        decoded = UpSampling2D((2, 2), name=names[1])(decoded)
         decoded = Conv2D(64, (3, 3), activation='relu', padding='same',
-                         kernel_regularizer=regularizers.l2(1e-3))(decoded)
-        decoded = UpSampling2D((2, 2))(decoded)
+                         kernel_regularizer=regularizers.l2(1e-3), name=names[2])(decoded)
+        decoded = UpSampling2D((2, 2), name=names[3])(decoded)
         decoded = Conv2D(32, (3, 3), activation='relu', padding='same',
-                         kernel_regularizer=regularizers.l2(1e-3))(decoded)
-        decoded = UpSampling2D((2, 2))(decoded)
+                         kernel_regularizer=regularizers.l2(1e-3), name=names[4])(decoded)
+        decoded = UpSampling2D((2, 2), name=names[5])(decoded)
         decoded = Conv2D(1, (3, 3), activation='tanh', padding='same',
-                         kernel_regularizer=regularizers.l2(1e-3))(decoded)
+                         kernel_regularizer=regularizers.l2(1e-3), name=names[6])(decoded)
+        return decoded
+
+
+    def encode_2(self, inputs, layer_start_index):
+         # layer_starT_index is so we can identify the layers by name in ssSEMnet: input is the starting index for which we wish to name
+        # e.g. layer_start_index = 1 --> the layers will be named encode1, encode2, ...etc
+        indices = list(
+            map(str, list(range(layer_start_index, layer_start_index + 2))))
+        names = []
+        for element in indices:
+            names.append('encode_' + element)
+        encoded = Conv2D(32, (3, 3), activation='relu', padding='same',
+                         kernel_regularizer=regularizers.l2(1e-3), name=names[0])(inputs)
+        encoded = MaxPooling2D((2, 2), name=names[1])(encoded)
+        return encoded
+
+    def decode_2(self, encoded_input):
+        indices = list(map(str, list(range(3))))
+        names = []
+        for element in indices:
+            names.append('decode_' + element)
+
+        decoded = Conv2D(128, (3, 3), activation='relu', padding='same',
+                         kernel_regularizer=regularizers.l2(1e-3), name=names[0])(encoded_input)
+        decoded = UpSampling2D((2, 2), name=names[1])(decoded)
+        decoded = Conv2D(1, (3, 3), activation='tanh', padding='same',
+                         kernel_regularizer=regularizers.l2(1e-3), name=names[2])(decoded)
         return decoded
 
     def getAutoencoder(self, inputs):
-        encoded = self.encode(inputs, 1)
-        decoded = self.decode(encoded)
+        if self.encoding_decoding_choice is None:
+            encoded = self.encode(inputs, 1)
+            decoded = self.decode(encoded)
+        else:
+            encoded = self.encode_2(inputs, 1)
+            decoded = self.decode_2(encoded)
+
         model = Model(inputs, decoded)
         model.compile(optimizer='adam', loss='mean_squared_error')
         model.summary()
