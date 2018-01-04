@@ -2,10 +2,11 @@ import os
 import numpy as np
 from skimage import io
 from pathlib import Path
-
 from ConvAutoencoder import ConvAutoEncoder2D
 from MakeDataset import save_array, normalize, load_array
 import config
+
+ModelFileAutoEncoder = r'models/coreg_autoencoder.hdf5'
 
 
 def get_files(dir):
@@ -17,7 +18,7 @@ def concatenate_images(image_1_filename, image_2_filename, i):
     image1 = io.imread(image_1_filename)
     image2 = io.imread(image_2_filename)
     print(image1.shape, image2.shape)
-    image = np.concatenate((image1, image2), axis=1)
+    image = np.concatenate((image1, image2), axis=0)
     # image = np.concatenate((image1, image2), axis=2)
     # image = np.swapaxes(image, 1, 2)
     # image = np.swapaxes(image, 0, 1)
@@ -53,11 +54,11 @@ else:
 
 print(X.shape)
 
-checkpoint_filename = os.path.join(config.checkpoint_dir, 'mynet')
+#checkpoint_filename = os.path.join(config.checkpoint_dir, 'mynet')
 
 # Train
 mynet = ConvAutoEncoder2D(
-    checkpoint_filename, X.shape[1], X.shape[2], encoding_decoding_choice=1)
+    ModelFileAutoEncoder, X.shape[1], X.shape[2], config.encoding_decoding_choice)
 mynet.train(X)
 
 

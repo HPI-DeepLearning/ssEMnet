@@ -71,6 +71,7 @@ class ConvAutoEncoder2D(object):
         names = []
         for element in indices:
             names.append('encode_' + element)
+
         encoded = Conv2D(32, (3, 3), activation='relu', padding='same',
                          kernel_regularizer=regularizers.l2(1e-3), name=names[0])(inputs)
         encoded = MaxPooling2D((2, 2), name=names[1])(encoded)

@@ -59,10 +59,10 @@ class ssEMnet(object):
                                input_shape=self.input1_shape, name='stm')(input1)
         g = ConvAutoEncoder2D(self.ModelFileAutoEncoder, x.get_shape().as_list()[
                               0], x.get_shape().as_list()[1])
-        x1 = g.encode(x, 1)
+        x1 = g.encode_2(x, 1)
 
         # Produce feature map of target images
-        y = g.encode(input2, 7)
+        y = g.encode_2(input2, 7)
 
         # Now we want to calculate the loss, we measure similarity between images. Should be scalar
         z = Lambda(mse_image_similarity)([x1, y])
@@ -71,15 +71,20 @@ class ssEMnet(object):
 
         # Placeholder for autoencoder so we can load the trained weights into our encoder
         # encode layers start naming at 1 and end at 6
-        autoencoder = Model(input1, g.decode(g.encode(input1, 1)))
+        autoencoder = Model(input1, g.decode_2(g.encode_2(input1, 1)))
+        #model.summary() # for debug
         autoencoder.load_weights(self.ModelFileAutoEncoder)
 
         # Now make weights untrainable in the encoder level
         for l in model.layers:
             if 'encode' in l.name:
-                i = int(l.name[6:])  # the number of the encode layer
+                print(l.name)
+                #i = int(l.name[6:])  # the number of the encode layer
+                i = int(l.name[7:])  # the number of the encode layer
+                print(i)
+                autoencoder.summary()
                 weights = autoencoder.get_layer(
-                    'encode' + str((i + 5) % 6 + 1)).get_weights()
+                    'encode_' + str((i + 5) % 6 + 1)).get_weights()
                 l.set_weights(weights)
                 l.trainable = False  # Make encoder layers not trainable
 

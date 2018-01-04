@@ -4,9 +4,9 @@ from ConvAutoencoder import ConvAutoEncoder2D
 from MakeDataset import save_array, normalize, load_array
 
 # User input
-ProcessedDirectory = r'D:\analysis\data\processed\Coreg_test\X.bc'
-ModelFile = r'D:\analysis\models\coreg_autoencoder.hdf5'
-imageSink = r'D:\analysis\data\processed\Coreg_test\check.tif'
+ProcessedDirectory = r'data/processed/Coreg_test/X.bc'
+ModelFile = r'models/coreg_autoencoder.hdf5'
+imageSink = r'data/processed/Coreg_test/check.tif'
 # End user input
 
 # Predict data
