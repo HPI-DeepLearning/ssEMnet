@@ -3,13 +3,15 @@ import numpy as np
 from ConvAutoencoder import ConvAutoEncoder2D
 from MakeDataset import save_array, normalize, load_array
 
-# User input
-ProcessedDirectory = r'D:\analysis\data\processed\Coreg_test\X.bc'
-ModelFile = r'D:\analysis\models\coreg_autoencoder.hdf5'
-imageSink = r'D:\analysis\data\processed\Coreg_test\check.tif'
-# End user input
+import config
+
+concatenated_filename = os.path.join(config.processed_dir, 'concatenated')
+checkpoint_filename = os.path.join(config.checkpoint_dir, 'mynet')
+
 
 # Predict data
-X = load_array(ProcessedDirectory)
-mynet = ConvAutoEncoder2D(ModelFile, X.shape[1], X.shape[2])
-mynet.predictModel(X, imageSink)
+X = load_array(concatenated_filename)
+
+mynet = ConvAutoEncoder2D(
+    checkpoint_filename, X.shape[1], X.shape[2], encoding_decoding_choice=1)
+mynet.predictModel(X)
