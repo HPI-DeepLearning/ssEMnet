@@ -9,7 +9,6 @@ from keras.layers import Input, Lambda
 from keras import backend as K
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 
-
 '''
 Module that tries to replicate ssEMnet (use weights from trained autoencoder)
 and input into a spatial transformation network - done in 2D
@@ -136,7 +135,14 @@ class ssEMnet(object):
         transformed_images = np.swapaxes(transformed_images, 1, 2)
 
         # This is using clarity.IO
-        # if not imageSink is None:
-        # io.writeData(imageSink, transformed_images)
+        if not imageSink is None:
+            #io.writeData(imageSink, transformed_images)
+
+            # Open a file
+            fo = open(imageSink, "w")
+            fo.write(transformed_images)
+
+            # Close opend file
+            fo.close()
 
         return transformed_images

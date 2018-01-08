@@ -17,8 +17,8 @@ ModelFileAutoEncoder = r'models/coreg_autoencoder.hdf5'
 ModelFile = r'models/ssemnet.hdf5'
 # Where we put predicted transformation images
 imageSink = r'results/ssEMnet_crude_2DAffine.tif'
-toTrain = False
-toPredict = True
+toTrain = True
+toPredict = False
 
 # End user input
 

@@ -10,6 +10,7 @@ ProcessedDirectory = r'data/processed'
 
 ModelFile = r'models/coreg_autoencoder.hdf5'
 imageSink = r'data/processed/check.tif'
+#imageSink = r'results/ssEMnet_crude_2DAffine.tif'
 # End user input
 
 # Predict data

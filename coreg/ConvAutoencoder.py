@@ -128,7 +128,15 @@ class ConvAutoEncoder2D(object):
 
         # Since all the pixel values are between -1 and 1, map to be between 0 and 1.
         imgs_mask_test = (imgs_mask_test / np.amax(imgs_mask_test) + 1) * 0.5
-        # if not imageSink is None:
-        # io.writeData(imageSink, imgs_mask_test)
+        if not imageSink is None:
+            #io.writeData(imageSink, imgs_mask_test)
+
+            # Open a file
+            #fo = open(imageSink, "w")
+            #fo.write(imgs_mask_test)
+            np.save(imageSink, imgs_mask_test)
+
+            # Close opend file
+            #fo.close()
 
         return imgs_mask_test
