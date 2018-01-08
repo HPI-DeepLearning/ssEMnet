@@ -78,10 +78,10 @@ class ssEMnet(object):
         # Now make weights untrainable in the encoder level
         for l in model.layers:
             if 'encode' in l.name:
-                print(l.name)
+                #print(l.name)
                 #i = int(l.name[6:])  # the number of the encode layer
                 i = int(l.name[7:])  # the number of the encode layer
-                print(i)
+                #print(i)
                 autoencoder.summary()
                 weights = autoencoder.get_layer(
                     'encode_' + str((i + 5) % 6 + 1)).get_weights()
@@ -113,18 +113,22 @@ class ssEMnet(object):
 
     def predictModel(self, X1, imageSink):
         # Load weights of just the spatial transformer network
+        print("available images to predict: ", X1.shape)
         model = self.getssEMnet()
         model.load_weights(self.ModelFile)
 
         predicted = self.getPredictNet()
         # Load the appropriate weights into the spatial transformer layer
         stm_weights = model.get_layer('stm').get_weights()
-        print(stm_weights)
+
+        #print('stm_weights: ', stm_weights)
+        print('stm_weights length: ', len(stm_weights))
         predicted.get_layer('stm').set_weights(stm_weights)
 
         X1 = normalize(X1)
         transformed_images = predicted.predict(X1, batch_size=1, verbose=1)
-        print(transformed_images)
+        #print('transformed_images: ', transformed_images)
+        print('transformed_images length: ', len(transformed_images))
         transformed_images = transformed_images / \
             np.amax(abs(transformed_images))
         transformed_images = (transformed_images + 1) * 0.5
