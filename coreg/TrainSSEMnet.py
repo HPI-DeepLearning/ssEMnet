@@ -5,6 +5,7 @@ from SpatialTransformNetwork import locNet
 import os
 import config
 from TrainConvAutoencoder import get_file_names, read_images
+from skimage import color
 
 '''
 Trains a ssEMnet to do 2D affine co-registration 
@@ -28,12 +29,12 @@ if os.path.isfile(config.concatenated_filename):
     X2 = X[num_images:]
 else:
     print("reloading every image")
-    X1 = np.empty((len(images_1), 28, 28))
-    X2 = np.empty((len(images_2), 28, 28))
+    X1 = np.empty((len(images_1), 256, 216))
+    X2 = np.empty((len(images_2), 256, 216))
     for i in range(len(images_1)):
-        X1[i] = read_images(images_1[i])
+        X1[i] = color.rgb2gray(read_images(images_1[i]))
     for i in range(len(images_2)):          #TODO: double check if same range length necessary
-        X2[i] = read_images(images_2[i])
+        X2[i] = color.rgb2gray(read_images(images_2[i]))
     X1 = np.expand_dims(X1, axis=3)
     X2 = np.expand_dims(X2, axis=3)
     if not os.path.exists(config.processed_dir):

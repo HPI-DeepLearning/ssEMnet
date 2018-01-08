@@ -1,7 +1,7 @@
 import os
 
-image_1_dir = 'data/mnist_min/0_1'
-image_2_dir = 'data/mnist_min/0_2'
+image_1_dir = 'data/Cardiac_small_sample/ES_moving' #moving
+image_2_dir = 'data/Cardiac_small_sample/ED_fixed' #fixed
 processed_dir = 'data/processed'
 checkpoint_dir = 'checkpoints'
 checkpoint_name = 'autoencoderModel'
