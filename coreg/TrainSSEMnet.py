@@ -12,13 +12,13 @@ Trains a ssEMnet to do 2D affine coregistratoin
 
 # User input
 #ProcessedDirectory = r'D:\analysis\data\processed\coreg_test\X.bc'
-ProcessedDirectory = r'ssEMnet/data/processed'
+ProcessedDirectory = r'data/processed'
 ModelFileAutoEncoder = r'models/coreg_autoencoder.hdf5'
 ModelFile = r'models/ssemnet.hdf5'
 # Where we put predicted transformation images
-imageSink = r'results/coreg_test/ssEMnet_crude_2DAffine.tif'
-toTrain = True
-toPredict = False
+imageSink = r'results/ssEMnet_crude_2DAffine.tif'
+toTrain = False
+toPredict = True
 
 # End user input
 
