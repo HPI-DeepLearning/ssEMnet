@@ -131,14 +131,10 @@ class ConvAutoEncoder2D(object):
         imgs_mask_test = (imgs_mask_test / np.amax(imgs_mask_test) + 1) * 0.5
         imgs_mask_test = np.swapaxes(imgs_mask_test, 2, 1)
         imgs_mask_test = np.swapaxes(imgs_mask_test, 1, 0)
-        #print(imgs_mask_test.shape)
         if not imageSink is None:
 
-          #  print(imgs_mask_test.shape)
             for i in range(imgs_mask_test.shape[0]):
-               # print(i)
                 image = imgs_mask_test[i][:,:,-1]
-                #print(image.shape)
-                io.imsave(imageSink + "autoencoderResult" + str(i) + ".jpeg", image)
+                io.imsave(imageSink + "autoencoderResult" + str(i) + ".png", image)
 
         return imgs_mask_test

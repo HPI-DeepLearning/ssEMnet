@@ -132,16 +132,13 @@ class ssEMnet(object):
         transformed_images = transformed_images / \
             np.amax(abs(transformed_images))
         transformed_images = (transformed_images + 1) * 0.5
-       # transformed_images = np.swapaxes(transformed_images, 0, 1)
-       # transformed_images = np.swapaxes(transformed_images, 1, 2)
-        print("yolo", transformed_images.shape)
-        # This is using clarity.IO
+        #transformed_images = np.swapaxes(transformed_images, 0, 1)
+        #transformed_images = np.swapaxes(transformed_images, 1, 2)
+        #print("transformed images shape", transformed_images.shape)
         if not imageSink is None:
 
             for i in range(transformed_images.shape[0]):
-                print(i)
                 image = transformed_images[i][:, :, -1]
-                print(image.shape)
-                io.imsave(imageSink + "ssEMnetResult" + str(i) + ".jpeg", image)
+                io.imsave(imageSink + "ssemnet_transformed" + str(i) + ".png", image)
 
         return transformed_images
