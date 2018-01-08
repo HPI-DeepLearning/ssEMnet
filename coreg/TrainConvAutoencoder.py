@@ -34,20 +34,20 @@ images_2 = get_files(config.image_2_dir)
 print('images1', images_1)
 print('images2', images_2)
 
-concatenated_filename = os.path.join(config.processed_dir, 'concatenated')
+#concatenated_filename = os.path.join(config.processed_dir, 'concatenated')
 
-if os.path.isfile(concatenated_filename):
-    X = load_array(concatenated_filename)
+if os.path.isfile(config.concatenated_filename):
+    X = load_array(config.concatenated_filename)
 else:
-    X = np.empty((len(images_1), 28*2, 28));
-    #X = np.empty((len(images_1), 28, 28))
+    #X = np.empty((len(images_1), 28*2, 28));
+    X = np.empty((len(images_1), 28, 28))
     for i in range(len(images_1)):
-        X[i] = concatenate_images(images_1[i], images_2[i], i)
-        #X[i] = read_images(images_1[i])
+        #X[i] = concatenate_images(images_1[i], images_2[i], i)
+        X[i] = read_images(images_1[i])
     X = np.expand_dims(X, axis=3)
-    if not os.path.exists(concatenated_filename):
-        os.makedirs(concatenated_filename)
-    save_array(concatenated_filename, X)
+    if not os.path.exists(config.concatenated_filename):
+        os.makedirs(config.concatenated_filename)
+    save_array(config.concatenated_filename, X)
 
 print(X.shape)
 
