@@ -11,6 +11,7 @@ from keras.metrics import categorical_crossentropy, categorical_accuracy, binary
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 import matplotlib.pyplot as plt
 from keras import regularizers
+from skimage import io
 
 '''
 Module that introduces a convolutional autoencoder
@@ -128,13 +129,23 @@ class ConvAutoEncoder2D(object):
 
         # Since all the pixel values are between -1 and 1, map to be between 0 and 1.
         imgs_mask_test = (imgs_mask_test / np.amax(imgs_mask_test) + 1) * 0.5
+        imgs_mask_test = np.swapaxes(imgs_mask_test, 2, 1)
+        imgs_mask_test = np.swapaxes(imgs_mask_test, 1, 0)
+        print(imgs_mask_test.shape)
         if not imageSink is None:
             #io.writeData(imageSink, imgs_mask_test)
 
             # Open a file
             #fo = open(imageSink, "w")
             #fo.write(imgs_mask_test)
-            np.save(imageSink, imgs_mask_test)
+            #np.save(imageSink, imgs_mask_test)
+            print(imgs_mask_test.shape)
+            for i in range(imgs_mask_test.shape[0]):
+                print(i)
+                image = imgs_mask_test[i][:,:,-1]
+                print(image.shape)
+                #print(imgs_mask_test.shape[i])
+                io.imsave(imageSink + "bla" + str(i) + ".jpeg", image)
 
             # Close opend file
             #fo.close()

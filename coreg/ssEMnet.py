@@ -8,6 +8,7 @@ from keras.optimizers import Adam
 from keras.layers import Input, Lambda
 from keras import backend as K
 from keras.callbacks import EarlyStopping, ModelCheckpoint
+from skimage import io
 
 '''
 Module that tries to replicate ssEMnet (use weights from trained autoencoder)
@@ -139,10 +140,13 @@ class ssEMnet(object):
             #io.writeData(imageSink, transformed_images)
 
             # Open a file
-            fo = open(imageSink, "w")
-            fo.write(transformed_images)
+            #fo = open(imageSink, "w")
+            #fo.write(transformed_images)
 
             # Close opend file
-            fo.close()
+            #fo.close()
+
+            #np.save(imageSink, transformed_images)
+            io.imsave(imageSink+"bla.jpeg", transformed_images)
 
         return transformed_images

@@ -6,9 +6,6 @@ from ConvAutoencoder import ConvAutoEncoder2D
 from MakeDataset import save_array, normalize, load_array
 import config
 
-ModelFileAutoEncoder = r'models/coreg_autoencoder.hdf5'
-
-
 def get_files(dir):
     for root, dirs, files in os.walk(config.image_1_dir):
         return [os.path.join(config.image_1_dir, fn) for fn in files]
@@ -42,11 +39,11 @@ concatenated_filename = os.path.join(config.processed_dir, 'concatenated')
 if os.path.isfile(concatenated_filename):
     X = load_array(concatenated_filename)
 else:
-    # X = np.empty((len(images_1), 28, 28 * 2));
-    X = np.empty((len(images_1), 28, 28))
+    X = np.empty((len(images_1), 28*2, 28));
+    #X = np.empty((len(images_1), 28, 28))
     for i in range(len(images_1)):
-        # X[i] = concatenate_images(images_1[i], images_2[i], i)
-        X[i] = read_images(images_1[i])
+        X[i] = concatenate_images(images_1[i], images_2[i], i)
+        #X[i] = read_images(images_1[i])
     X = np.expand_dims(X, axis=3)
     if not os.path.exists(concatenated_filename):
         os.makedirs(concatenated_filename)
@@ -54,11 +51,15 @@ else:
 
 print(X.shape)
 
-#checkpoint_filename = os.path.join(config.checkpoint_dir, 'mynet')
+checkpoint_filename = os.path.join(config.checkpoint_dir, config.checkpoint_name)
+
+# create checkpoints folder if needed
+if not os.path.exists(config.checkpoint_dir):
+    os.makedirs(config.checkpoint_dir)
 
 # Train
 mynet = ConvAutoEncoder2D(
-    ModelFileAutoEncoder, X.shape[1], X.shape[2], config.encoding_decoding_choice)
+    checkpoint_filename, X.shape[1], X.shape[2], config.encoding_decoding_choice)
 mynet.train(X)
 
 
