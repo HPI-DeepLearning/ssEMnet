@@ -51,11 +51,11 @@ else:
 
 print(X.shape)
 
-checkpoint_filename = os.path.join(config.checkpoint_dir, 'mynet')
+checkpoint_filename = os.path.join(config.checkpoint_dir, config.checkpoint_name)
 
 # create checkpoints folder if needed
-if not os.path.exists(checkpoint_dir):
-    os.makedirs(checkpoint_dir)
+if not os.path.exists(config.checkpoint_dir):
+    os.makedirs(config.checkpoint_dir)
 
 # Train
 mynet = ConvAutoEncoder2D(
