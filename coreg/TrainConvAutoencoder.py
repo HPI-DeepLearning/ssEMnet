@@ -6,14 +6,14 @@ from ConvAutoencoder import ConvAutoEncoder2D
 from MakeDataset import save_array, normalize, load_array
 import config
 
-def get_files(dir):
-    for root, dirs, files in os.walk(config.image_1_dir):
-        return [os.path.join(config.image_1_dir, fn) for fn in files]
+def get_file_names(dir):
+    for root, dirs, files in os.walk(dir):
+        return [os.path.join(dir, fn) for fn in files]
 
 
-def concatenate_images(image_1_filename, image_2_filename, i):
-    image1 = io.imread(image_1_filename)
-    image2 = io.imread(image_2_filename)
+def concatenate_images(image_1_files, image_2_files, i):
+#    image1 = io.imread(image_1_filename)
+#    image2 = io.imread(image_2_filename)
     print(image1.shape, image2.shape)
     image = np.concatenate((image1, image2), axis=0)
     # image = np.concatenate((image1, image2), axis=2)
@@ -26,25 +26,40 @@ def read_images(image_filename):
     print(image_filename)
     return io.imread(image_filename)
 
-
 # image 1
-images_1 = get_files(config.image_1_dir)
-images_2 = get_files(config.image_2_dir)
+images_1_filenames = get_file_names(config.image_1_dir)
+images_2_filenames = get_file_names(config.image_2_dir)
 
-print('images1', images_1)
-print('images2', images_2)
+print('images1', images_1_filenames)
+print('images2', images_2_filenames)
 
 #concatenated_filename = os.path.join(config.processed_dir, 'concatenated')
 
 if os.path.isfile(config.concatenated_filename):
     X = load_array(config.concatenated_filename)
 else:
-    #X = np.empty((len(images_1), 28*2, 28));
-    X = np.empty((len(images_1), 28, 28))
-    for i in range(len(images_1)):
+    #X = np.empty((len(images_1_filenames), 28*2, 28));
+    #X = np.empty((len(images_1_filenames), 28, 28))
+    images_1 = np.empty((len(images_1_filenames), 28, 28))
+    for i in range(len(images_1_filenames)):
         #X[i] = concatenate_images(images_1[i], images_2[i], i)
-        X[i] = read_images(images_1[i])
+        #X[i] = np.concatenate(images_1, images_2, axis=2)
+        images_1[i] = io.imread(images_1_filenames[i])
+    #images_1 = np.expand_dims(images_1, axis=3)
+
+    images_2 = np.empty((len(images_2_filenames), 28, 28))
+    for i in range(len(images_2_filenames)):
+        images_2[i] = io.imread(images_2_filenames[i])
+    #images_2 = np.expand_dims(images_2, axis=3)
+
+    print('shape of images1', images_1.shape)
+    X = np.concatenate((images_1, images_2), axis=0)
+
+    print('shape of X', X.shape)
+
+
     X = np.expand_dims(X, axis=3)
+
     if not os.path.exists(config.concatenated_filename):
         os.makedirs(config.concatenated_filename)
     save_array(config.concatenated_filename, X)
