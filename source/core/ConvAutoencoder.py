@@ -1,5 +1,4 @@
 import numpy as np
-from MakeDataset import normalize
 from keras import backend as K
 from keras.preprocessing import image
 from keras.models import Model
@@ -13,7 +12,7 @@ import matplotlib.pyplot as plt
 from keras import regularizers
 from skimage import io
 
-import util
+from .MakeDataset import normalize
 
 '''
 Module that introduces a convolutional autoencoder

@@ -1,6 +1,9 @@
 import numpy as np
 from keras import backend as K
-from metrics import dice, jaccard
+
+from .metrics import dice, jaccard
+
+
 '''
 Module with custom loss functions 
 '''
