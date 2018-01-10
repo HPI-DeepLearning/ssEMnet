@@ -46,7 +46,7 @@ print(X1.shape)
 
 # Train
 # Try on very small data set
-mynet = ssEMnet(X1.shape[1:], X2.shape[1:], config.checkpoint_filename, config.ModelFile)
+mynet = ssEMnet(X1.shape[1:], X2.shape[1:], config.checkpoint_autoencoder_filename, config.checkpoint_ssemnet_filename)
 if toTrain:
     mynet.train(X1, X2)
 

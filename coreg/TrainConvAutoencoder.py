@@ -49,5 +49,5 @@ if not os.path.exists(config.checkpoint_dir):
 
 # Train
 mynet = ConvAutoEncoder2D(
-    config.checkpoint_filename, X.shape[1], X.shape[2], config.encoding_decoding_choice)
+    config.checkpoint_autoencoder_filename, X.shape[1], X.shape[2], config.encoding_decoding_choice)
 mynet.train(X)
