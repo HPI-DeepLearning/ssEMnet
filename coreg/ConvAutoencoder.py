@@ -11,6 +11,7 @@ from keras.metrics import categorical_crossentropy, categorical_accuracy, binary
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 import matplotlib.pyplot as plt
 from keras import regularizers
+from skimage import io
 
 import util
 
@@ -73,6 +74,7 @@ class ConvAutoEncoder2D(object):
         names = []
         for element in indices:
             names.append('encode_' + element)
+
         encoded = Conv2D(32, (3, 3), activation='relu', padding='same',
                          kernel_regularizer=regularizers.l2(1e-3), name=names[0])(inputs)
         encoded = MaxPooling2D((2, 2), name=names[1])(encoded)
@@ -132,7 +134,12 @@ class ConvAutoEncoder2D(object):
 
         # Since all the pixel values are between -1 and 1, map to be between 0 and 1.
         imgs_mask_test = (imgs_mask_test / np.amax(imgs_mask_test) + 1) * 0.5
-        # if not imageSink is None:
-        # io.writeData(imageSink, imgs_mask_test)
+        imgs_mask_test = np.swapaxes(imgs_mask_test, 2, 1)
+        imgs_mask_test = np.swapaxes(imgs_mask_test, 1, 0)
+        if not imageSink is None:
+
+            for i in range(imgs_mask_test.shape[0]):
+                image = imgs_mask_test[i][:, :, -1]
+                io.imsave(imageSink + "autoencoderResult" + str(i) + ".png", image)
 
         return imgs_mask_test
