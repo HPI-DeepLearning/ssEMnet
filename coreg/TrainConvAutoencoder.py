@@ -6,13 +6,16 @@ from ConvAutoencoder import ConvAutoEncoder2D
 from MakeDataset import save_array, normalize, load_array
 import config
 
+
 def get_file_names(dir):
     for root, dirs, files in os.walk(dir):
         return [os.path.join(dir, fn) for fn in files]
 
+
 def read_images(image_filename):
     print(image_filename)
     return io.imread(image_filename)
+
 
 # images
 images_1_filenames = get_file_names(config.image_1_dir)
@@ -21,7 +24,8 @@ images_2_filenames = get_file_names(config.image_2_dir)
 print('images1', images_1_filenames)
 print('images2', images_2_filenames)
 
-if os.path.isfile(config.concatenated_filename):
+if os.path.isdir(config.concatenated_filename):
+    print('loading saved data')
     X = load_array(config.concatenated_filename)
 else:
     images_1 = np.empty((len(images_1_filenames), 28, 28))
@@ -37,6 +41,7 @@ else:
     print('shape of X', X.shape)
     X = np.expand_dims(X, axis=3)
 
+    # create directory to save array
     if not os.path.exists(config.concatenated_filename):
         os.makedirs(config.concatenated_filename)
     save_array(config.concatenated_filename, X)

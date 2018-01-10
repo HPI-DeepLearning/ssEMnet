@@ -20,36 +20,19 @@ toPredict = True
 images_1 = get_file_names(config.image_1_dir)
 images_2 = get_file_names(config.image_2_dir)
 
-#TODO: fix paths
-if os.path.isfile(config.concatenated_filename):
+if os.path.isdir(config.concatenated_filename):
     X = load_array(config.concatenated_filename)
     num_images = int(X.shape[0] / 2)
     X1 = X[:num_images]
     X2 = X[num_images:]
 else:
-    print("reloading every image")
-    X1 = np.empty((len(images_1), 28, 28))
-    X2 = np.empty((len(images_2), 28, 28))
-    for i in range(len(images_1)):
-        X1[i] = read_images(images_1[i])
-    for i in range(len(images_2)):          #TODO: double check if same range length necessary
-        X2[i] = read_images(images_2[i])
-    X1 = np.expand_dims(X1, axis=3)
-    X2 = np.expand_dims(X2, axis=3)
-    if not os.path.exists(config.processed_dir):
-        os.makedirs(config.processed_dir)
-    save_array(config.processed_dir, X1)
-    save_array(config.processed_dir, X2)
+    raise Exception('You have to run TrainConvAutoencoder to create the data.')
 
-print("X1 shape: ")
-print(X1.shape)
-
-# Train
-# Try on very small data set
-mynet = ssEMnet(X1.shape[1:], X2.shape[1:], config.checkpoint_autoencoder_filename, config.checkpoint_ssemnet_filename)
+net = ssEMnet(X1.shape[1:], X2.shape[1:],
+                config.checkpoint_autoencoder_filename, config.checkpoint_ssemnet_filename)
 if toTrain:
-    mynet.train(X1, X2)
+    net.train(X1, X2)
 
 # Predict?
 if toPredict:
-    transformed_images = mynet.predictModel(X1, config.image_sink)
+    transformed_images = net.predictModel(X1, config.image_sink)
