@@ -24,11 +24,11 @@ print('images2', images_2_filenames)
 if os.path.isfile(config.concatenated_filename):
     X = load_array(config.concatenated_filename)
 else:
-    images_1 = np.empty((len(images_1_filenames), 28, 28))
+    images_1 = np.empty((len(images_1_filenames), config.image_width, config.image_height))
     for i in range(len(images_1_filenames)):
         images_1[i] = io.imread(images_1_filenames[i])
 
-    images_2 = np.empty((len(images_2_filenames), 28, 28))
+    images_2 = np.empty((len(images_2_filenames), config.image_width, config.image_height))
     for i in range(len(images_2_filenames)):
         images_2[i] = io.imread(images_2_filenames[i])
 

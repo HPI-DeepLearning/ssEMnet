@@ -28,8 +28,8 @@ if os.path.isfile(config.concatenated_filename):
     X2 = X[num_images:]
 else:
     print("reloading every image")
-    X1 = np.empty((len(images_1), 28, 28))
-    X2 = np.empty((len(images_2), 28, 28))
+    X1 = np.empty((len(images_1), config.image_width, config.image_height))
+    X2 = np.empty((len(images_2), config.image_width, config.image_height))
     for i in range(len(images_1)):
         X1[i] = read_images(images_1[i])
     for i in range(len(images_2)):          #TODO: double check if same range length necessary

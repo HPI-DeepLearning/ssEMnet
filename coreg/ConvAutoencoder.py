@@ -87,7 +87,7 @@ class ConvAutoEncoder2D(object):
         decoded = Conv2D(128, (3, 3), activation='relu', padding='same',
                          kernel_regularizer=regularizers.l2(1e-3), name=names[0])(encoded_input)
         decoded = UpSampling2D((2, 2), name=names[1])(decoded)
-        decoded = Conv2D(1, (3, 3), activation='tanh', padding='same',
+        decoded = Conv2D(1, (2, 2), activation='tanh', padding='same',
                          kernel_regularizer=regularizers.l2(1e-3), name=names[2])(decoded)
         return decoded
 
