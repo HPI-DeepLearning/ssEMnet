@@ -1,5 +1,4 @@
 import numpy as np
-from MakeDataset import normalize
 from keras import backend as K
 from keras.preprocessing import image
 from keras.models import Model
@@ -12,6 +11,8 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 import matplotlib.pyplot as plt
 from keras import regularizers
 from skimage import io
+
+from .MakeDataset import normalize
 
 '''
 Module that introduces a convolutional autoencoder
@@ -89,6 +90,7 @@ class ConvAutoEncoder2D(object):
         decoded = UpSampling2D((2, 2), name=names[1])(decoded)
         decoded = Conv2D(1, (2, 2), activation='tanh', padding='same',
                          kernel_regularizer=regularizers.l2(1e-3), name=names[2])(decoded)
+        # util.save_image('test', decoded)
         return decoded
 
     def getAutoencoder(self, inputs):
@@ -99,9 +101,11 @@ class ConvAutoEncoder2D(object):
             encoded = self.encode_2(inputs, 1)
             decoded = self.decode_2(encoded)
 
+        print('getA', decoded)
         model = Model(inputs, decoded)
         model.compile(optimizer='adam', loss='mean_squared_error')
         model.summary()
+        print('getA', decoded)
         return model
 
     def train(self, X):

@@ -1,8 +1,8 @@
 import numpy as np
-from ConvAutoencoder import ConvAutoEncoder2D
-from SpatialTransformNetwork import *
-from objectives import generic_unsupervised_loss
-from MakeDataset import *
+from .ConvAutoencoder import ConvAutoEncoder2D
+from .SpatialTransformNetwork import *
+from .objectives import generic_unsupervised_loss
+from .MakeDataset import *
 from keras.models import Sequential, Model
 from keras.optimizers import Adam
 from keras.layers import Input, Lambda
