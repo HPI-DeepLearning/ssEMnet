@@ -7,9 +7,13 @@ from core.ConvAutoencoder import ConvAutoEncoder2D
 from core.MakeDataset import save_array, normalize, load_array
 import config
 
-def get_file_names(dir):
+
+def get_file_names(dir, index_from, index_to):
     for root, dirs, files in os.walk(dir):
-        return [os.path.join(dir, fn) for fn in files]
+        if index_from is None or index_to is None:
+            return [os.path.join(dir, fn) for fn in files]
+        else:
+            return [os.path.join(dir, fn) for fn in files[index_from:index_to]]
 
 
 def read_images(image_filename):
@@ -18,8 +22,8 @@ def read_images(image_filename):
 
 
 # images
-images_1_filenames = get_file_names(config.image_1_dir)
-images_2_filenames = get_file_names(config.image_2_dir)
+images_1_filenames = get_file_names(config.image_1_dir, 0, 100)
+images_2_filenames = get_file_names(config.image_2_dir, 100, 200)
 
 print('images1', images_1_filenames)
 print('images2', images_2_filenames)

@@ -1,7 +1,9 @@
 import os
 
-image_1_dir = 'data/mnist_min/0_1'
-image_2_dir = 'data/mnist_min/0_2'
+# image_1_dir = 'data/mnist_min/0_1'
+# image_2_dir = 'data/mnist_min/0_2'
+image_1_dir = 'data/mnist_png/testing/0/'
+image_2_dir = 'data/mnist_png/testing/0/'
 processed_dir = 'data/processed'
 checkpoint_dir = 'checkpoints'
 checkpoint_autoencoder_name = 'autoencoderModel.hdf5'
