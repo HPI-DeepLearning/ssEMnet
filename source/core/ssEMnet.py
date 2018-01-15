@@ -93,7 +93,7 @@ class ssEMnet(object):
                 l.set_weights(weights)
                 l.trainable = False  # Make encoder layers not trainable
 
-        model.compile(optimizer=SGD(lr=0.1),
+        model.compile(optimizer=SGD(lr=0.3),
                       loss=generic_unsupervised_loss,
                       loss_weights=[1., 0.0]) # ignores the loss of transformed image (the 2. output)
         model.summary()
@@ -111,7 +111,7 @@ class ssEMnet(object):
             [np.zeros((X1.shape[0],)), np.zeros(X1.shape,)], # the first one is the distance between the images to optimise, the second the transformed image (ignored for loss)
             batch_size=1,
             epochs=50,
-            shuffle=True, verbose=1, validation_split=0.2, callbacks=[model_checkpoint])
+            shuffle=False, verbose=1, validation_split=0.2, callbacks=[model_checkpoint])
 
     def predict(self, X1, X2, imageSink):
         X1 = normalize(X1)

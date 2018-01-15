@@ -1,7 +1,12 @@
-from keras.layers.core import Layer
+from keras.engine.topology import Layer
 from keras.layers import MaxPooling2D, Conv2D, Dense, Activation, Flatten
 from keras.models import Sequential
 import tensorflow as tf
+import numpy as np
+
+# taken from https://github.com/HPI-DeepLearning/DIRNet/blob/master/DIRNet-mxnet/convnet.py#L209
+def identity_matrix_init(shape, dtype=None):
+    return np.array([[1., 0, 0], [0, 1., 0]]).astype('float32').flatten()
 
 
 def locNet(input_shape):
@@ -13,7 +18,7 @@ def locNet(input_shape):
 
     locnet.add(Flatten())
     locnet.add(Dense(50, activation='relu', kernel_initializer='he_normal'))
-    locnet.add(Dense(6, kernel_initializer='he_normal'))
+    locnet.add(Dense(6, kernel_initializer='zeros', bias_initializer=identity_matrix_init)) # initalize with ID matrix
     return locnet
 
 
@@ -49,8 +54,13 @@ class SpatialTransformer(Layer):
     def build(self, input_shape):
         self.locnet.build(input_shape)
         self.trainable_weights = self.locnet.trainable_weights
+
+        # Be sure to call this somewhere!
+        # from: https://keras.io/layers/writing-your-own-keras-layers/
+        super(SpatialTransformer, self).build(input_shape)
+
         # self.regularizers = self.locnet.regularizers //NOT SUER ABOUT THIS, THERE IS NO MORE SUCH PARAMETR AT self.locnet
-        #self.constraints = self.locnet.constraints #TODO: einkommentieren und fixen
+        # self.constraints = self.locnet.constraints #TODO: einkommentieren und fixen
 
     def compute_output_shape(self, input_shape):
         output_size = self.output_size
