@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from keras import regularizers
 from skimage import io
 
-from .MakeDataset import normalize
+from .util import normalize
 
 '''
 Module that introduces a convolutional autoencoder

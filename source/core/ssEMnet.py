@@ -1,14 +1,16 @@
 import numpy as np
-from .ConvAutoencoder import ConvAutoEncoder2D
-from .SpatialTransformNetwork import *
-from .objectives import generic_unsupervised_loss
-from .MakeDataset import *
 from keras.models import Sequential, Model
 from keras.optimizers import Adam
 from keras.layers import Input, Lambda
 from keras import backend as K
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from skimage import io
+
+from .ConvAutoencoder import ConvAutoEncoder2D
+from .SpatialTransformNetwork import *
+from .objectives import generic_unsupervised_loss
+from .util import *
+
 
 '''
 Module that tries to replicate ssEMnet (use weights from trained autoencoder)

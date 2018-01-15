@@ -4,7 +4,7 @@ from skimage import io
 from pathlib import Path
 
 from core.ConvAutoencoder import ConvAutoEncoder2D
-from core.MakeDataset import save_array, normalize, load_array
+from core.util import save_array, normalize, load_array
 import config
 
 
