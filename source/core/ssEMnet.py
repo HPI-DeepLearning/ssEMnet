@@ -69,7 +69,7 @@ class ssEMnet(object):
         # Now we want to calculate the loss, we measure similarity between images. Should be scalar
         z = Lambda(mse_image_similarity)([x1, y])
 
-        model = Model((input1, input2), z)
+        model = Model((input1, input2), (z, x))
 
         # Placeholder for autoencoder so we can load the trained weights into our encoder
         # encode layers start naming at 1 and end at 6
@@ -93,18 +93,9 @@ class ssEMnet(object):
                 l.set_weights(weights)
                 l.trainable = False  # Make encoder layers not trainable
 
-        model.compile(optimizer=SGD(lr=0.01),
-                      loss=generic_unsupervised_loss)
-        model.summary()
-        return model
-
-    def getPredictNet(self):
-        # Calculate the transformation of the moving images to the fixed images
-
-        input1 = Input(self.input1_shape)
-        x = SpatialTransformer(localization_net=self.locnet, output_size=self.input1_shape,
-                               input_shape=self.input1_shape, name='stm')(input1)
-        model = Model(input1, x)
+        model.compile(optimizer=SGD(lr=0.1),
+                      loss=generic_unsupervised_loss,
+                      loss_weights=[1., 0.0]) # ignores the loss of transformed image (the 2. output)
         model.summary()
         return model
 
@@ -112,39 +103,27 @@ class ssEMnet(object):
         X1 = normalize(X1)
         X2 = normalize(X2)
         model = self.getssEMnet()
+
         model_checkpoint = ModelCheckpoint(
-            self.ModelFile, monitor='val_loss', verbose=1, save_best_only=True, save_weights_only=True)
-        model.fit([X1, X2], np.zeros((X1.shape[0],)), batch_size=1, epochs=50,
-                  shuffle=True, verbose=1, validation_split=0.2, callbacks=[model_checkpoint])
+            self.ModelFile, monitor='val_loss', verbose=1, save_best_only=True,
+            save_weights_only=True)
+        model.fit([X1, X2],
+            [np.zeros((X1.shape[0],)), np.zeros(X1.shape,)], # the first one is the distance between the images to optimise, the second the transformed image (ignored for loss)
+            batch_size=1,
+            epochs=50,
+            shuffle=True, verbose=1, validation_split=0.2, callbacks=[model_checkpoint])
 
-    def predictModel(self, X1, imageSink):
-        # Load weights of just the spatial transformer network
-        print("available images to predict: ", X1.shape)
-        model = self.getssEMnet()
-        model.load_weights(self.ModelFile)
-
-        predicted = self.getPredictNet()
-        # Load the appropriate weights into the spatial transformer layer
-        stm_weights = model.get_layer('stm').get_weights()
-
-        #print('stm_weights: ', stm_weights)
-        print('stm_weights length: ', len(stm_weights))
-        predicted.get_layer('stm').set_weights(stm_weights)
-
+    def predict(self, X1, X2, imageSink):
         X1 = normalize(X1)
-        transformed_images = predicted.predict(X1, batch_size=1, verbose=1)
-        #print('transformed_images: ', transformed_images)
-        print('transformed_images length: ', len(transformed_images))
-        transformed_images = transformed_images / \
-            np.amax(abs(transformed_images))
-        transformed_images = (transformed_images + 1) * 0.5
-        #transformed_images = np.swapaxes(transformed_images, 0, 1)
-        #transformed_images = np.swapaxes(transformed_images, 1, 2)
-        #print("transformed images shape", transformed_images.shape)
+        X2 = normalize(X2)
+        model = self.getssEMnet()
+        [_, results] = model.predict([X1, X2], batch_size=1, verbose=1)
+        results = results / \
+            np.amax(abs(results))
+        results = (results + 1) * 0.5
         if not imageSink is None:
-
-            for i in range(transformed_images.shape[0]):
-                image = transformed_images[i][:, :, -1]
-                io.imsave(imageSink + "ssemnet_transformed" + str(i) + ".png", image)
-
-        return transformed_images
+            for i in range(results.shape[0]):
+                image = results[i][:, :, -1]
+                io.imsave(imageSink + "ssemnet_transformed_joe" +
+                          str(i) + ".png", image)
+        return results
