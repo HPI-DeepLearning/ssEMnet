@@ -1,6 +1,6 @@
 import numpy as np
 from keras.models import Sequential, Model
-from keras.optimizers import Adam
+from keras.optimizers import SGD
 from keras.layers import Input, Lambda
 from keras import backend as K
 from keras.callbacks import EarlyStopping, ModelCheckpoint
@@ -80,17 +80,21 @@ class ssEMnet(object):
         # Now make weights untrainable in the encoder level
         for l in model.layers:
             if 'encode' in l.name:
-                #print(l.name)
-                #i = int(l.name[6:])  # the number of the encode layer
-                i = int(l.name[7:])  # the number of the encode layer
-                #print(i)
+                i = int(l.name[7:]) # cut of chars to get the number of the encode layer
+                print('Encode Index')
+                print(i)
+
+                index_in_autoencoder = (i + 5) % 6 + 1
+                print(index_in_autoencoder)
+
                 autoencoder.summary()
                 weights = autoencoder.get_layer(
-                    'encode_' + str((i + 5) % 6 + 1)).get_weights()
+                    'encode_' + str(index_in_autoencoder)).get_weights()
                 l.set_weights(weights)
                 l.trainable = False  # Make encoder layers not trainable
 
-        model.compile(optimizer=Adam(), loss=generic_unsupervised_loss)
+        model.compile(optimizer=SGD(lr=0.01),
+                      loss=generic_unsupervised_loss)
         model.summary()
         return model
 
@@ -110,7 +114,7 @@ class ssEMnet(object):
         model = self.getssEMnet()
         model_checkpoint = ModelCheckpoint(
             self.ModelFile, monitor='val_loss', verbose=1, save_best_only=True, save_weights_only=True)
-        model.fit([X1, X2], np.zeros((X1.shape[0],)), batch_size=1, epochs=10,
+        model.fit([X1, X2], np.zeros((X1.shape[0],)), batch_size=1, epochs=50,
                   shuffle=True, verbose=1, validation_split=0.2, callbacks=[model_checkpoint])
 
     def predictModel(self, X1, imageSink):
