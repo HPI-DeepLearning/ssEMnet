@@ -1,6 +1,4 @@
-import copy
-import os
-import glob
+from os import path, makedirs, walk
 import bcolz
 import numpy as np
 from skimage import io
@@ -8,8 +6,13 @@ from keras import backend as K
 
 import config
 
-def save_array(fname, arr): c = bcolz.carray(
-    arr, rootdir=fname, mode='w'); c.flush()
+
+def save_array(fname, arr):
+    # create directory to save array
+    if not path.exists(fname):
+        makedirs(fname)
+
+    c = bcolz.carray(arr, rootdir=fname, mode='w'); c.flush()
 
 
 def load_array(fname):
@@ -25,20 +28,15 @@ def normalize(X):
 
 
 def save_image(filename, image):
-    # tf_session = K.get_session()
-
     image = K.eval(image)
 
-    print('before', image.shape)
     image = image[0, :, :, :]
     image = image[:, :, 0]
-    print(image)
-    print('after', image.shape)
     io.imsave(filename, image)
 
-def read_array_from_file():
-    if os.path.isdir(config.concatenated_filename):
-        X = load_array(config.concatenated_filename)
+def read_array_from_file(filename):
+    if path.isdir(filename):
+        X = load_array(filename)
         num_images = int(X.shape[0] / 2)
         X1 = X[:num_images]
         X2 = X[num_images:]
@@ -49,8 +47,8 @@ def read_array_from_file():
 
 
 def get_file_names(dir, index_from, index_to):
-    for root, dirs, files in os.walk(dir):
+    for root, dirs, files in walk(dir):
         if index_from is None or index_to is None:
-            return [os.path.join(dir, fn) for fn in files]
+            return [path.join(dir, fn) for fn in files]
         else:
-            return [os.path.join(dir, fn) for fn in files[index_from:index_to]]
+            return [path.join(dir, fn) for fn in files[index_from:index_to]]

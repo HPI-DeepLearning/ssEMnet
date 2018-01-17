@@ -1,48 +1,36 @@
-import os
+from os import path, makedirs
 import numpy as np
 from skimage import io
-from pathlib import Path
 
 from core.ConvAutoencoder import ConvAutoEncoder2D
 from core.util import save_array, normalize, load_array, get_file_names
 import config
 
 # images
-images_1_filenames = get_file_names(config.image_1_dir, 0, 100)
-images_2_filenames = get_file_names(config.image_2_dir, 100, 200)
+moving_images_fns = get_file_names(config.training_moving_images_dir, 100, 200)
+fixed_images_fns = get_file_names(config.training_fixed_images_dir, 0, 100)
 
-print('images1', images_1_filenames)
-print('images2', images_2_filenames)
-
-if os.path.isdir(config.concatenated_filename):
+if path.isdir(config.training_saved_filename):
     print('loading saved data')
-    X = load_array(config.concatenated_filename)
+    X = load_array(config.training_saved_filename)
 else:
-    images_1 = np.empty((len(images_1_filenames), 28, 28))
-    for i in range(len(images_1_filenames)):
-        images_1[i] = io.imread(images_1_filenames[i])
+    moving_images = np.empty((len(moving_images_fns), 28, 28))
+    for i in range(len(moving_images_fns)):
+        moving_images[i] = io.imread(moving_images_fns[i])
 
-    images_2 = np.empty((len(images_2_filenames), 28, 28))
-    for i in range(len(images_2_filenames)):
-        images_2[i] = io.imread(images_2_filenames[i])
+    fixed_images = np.empty((len(fixed_images_fns), 28, 28))
+    for i in range(len(fixed_images_fns)):
+        fixed_images[i] = io.imread(fixed_images_fns[i])
 
-    print('shape of images1', images_1.shape)
-    X = np.concatenate((images_1, images_2), axis=0)
-    print('shape of X', X.shape)
+    X = np.concatenate((moving_images, fixed_images), axis=0)
     X = np.expand_dims(X, axis=3)
-
-    # create directory to save array
-    if not os.path.exists(config.concatenated_filename):
-        os.makedirs(config.concatenated_filename)
-    save_array(config.concatenated_filename, X)
-
-print(X.shape)
+    save_array(config.training_saved_filename, X)
 
 # create checkpoints folder if needed
-if not os.path.exists(config.checkpoint_dir):
-    os.makedirs(config.checkpoint_dir)
+if not path.exists(config.checkpoint_dir):
+    makedirs(config.checkpoint_dir)
 
-# Train
-mynet = ConvAutoEncoder2D(
+# train
+net = ConvAutoEncoder2D(
     config.checkpoint_autoencoder_filename, X.shape[1], X.shape[2], config.encoding_decoding_choice)
-mynet.train(X)
+net.train(X)
