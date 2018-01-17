@@ -46,3 +46,11 @@ def read_array_from_file():
     else:
         raise Exception(
             'You have to run TrainConvAutoencoder to create the data.')
+
+
+def get_file_names(dir, index_from, index_to):
+    for root, dirs, files in os.walk(dir):
+        if index_from is None or index_to is None:
+            return [os.path.join(dir, fn) for fn in files]
+        else:
+            return [os.path.join(dir, fn) for fn in files[index_from:index_to]]
