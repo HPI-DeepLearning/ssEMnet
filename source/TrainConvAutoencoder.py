@@ -14,6 +14,9 @@ import scipy.ndimage as ndimage
 moving_images_fns = get_file_names(config.training_moving_images_dir)
 fixed_images_fns = get_file_names(config.training_fixed_images_dir)
 
+moving_images_fns = get_file_names('data/raw/mnist_png/training/1', 0, 100)
+fixed_images_fns = get_file_names('data/raw/mnist_png/training/1', 100, 200)
+
 if False and path.isdir(config.training_saved_filename):
     print('loading saved data')
     X = load_array(config.training_saved_filename)
@@ -28,7 +31,6 @@ else:
     for i in range(len(fixed_images_fns)):
         fixed_images[i] = imread(fixed_images_fns[i], flatten=True, mode='L')
         # fixed_images[i] = io.imread(fixed_images_fns[i], as_grey=True)
-
 
     X = np.concatenate((moving_images, fixed_images), axis=0)
     X = np.expand_dims(X, axis=3)

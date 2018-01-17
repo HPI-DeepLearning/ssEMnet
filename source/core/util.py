@@ -12,7 +12,8 @@ def save_array(fname, arr):
     if not path.exists(fname):
         makedirs(fname)
 
-    c = bcolz.carray(arr, rootdir=fname, mode='w'); c.flush()
+    c = bcolz.carray(arr, rootdir=fname, mode='w')
+    c.flush()
 
 
 def load_array(fname):
@@ -20,8 +21,8 @@ def load_array(fname):
 
 
 def normalize(X):
-    X = X.astype('float32')
-    return X / (255 * 0.5) - 1
+    # X = X.astype('float32')
+    # return X / (255 * 0.5) - 1
     # for joe in X.flatten():
         # if joe > 63000:
             # print(joe)
@@ -41,6 +42,7 @@ def normalize(X):
     print('min: ', np.amin(Xn))
     print('max: ', np.amax(Xn))
     Xn = Xn / np.amax(Xn)
+    print(Xn)
     return Xn
 
 
@@ -50,6 +52,7 @@ def save_image(filename, image):
     image = image[0, :, :, :]
     image = image[:, :, 0]
     io.imsave(filename, image)
+
 
 def read_array_from_file(filename):
     if path.isdir(filename):
