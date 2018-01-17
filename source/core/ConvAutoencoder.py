@@ -139,6 +139,10 @@ class ConvAutoEncoder2D(object):
 
             for i in range(imgs_mask_test.shape[0]):
                 image = imgs_mask_test[i][:, :, -1]
-                io.imsave(imageSink + "autoencoderResult" + str(i) + ".png", image)
+                io.imsave(imageSink + "autoencoder_" + str(i) + ".png", image)
+                
+                orig_image = datas[i][:, :, -1]
+                io.imsave(
+                    imageSink + "autoencoder_" + str(i) + "_original.png", orig_image)
 
         return imgs_mask_test
