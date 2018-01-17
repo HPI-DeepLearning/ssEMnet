@@ -7,8 +7,8 @@ from core.util import save_array, normalize, load_array, get_file_names
 import config
 
 # images
-moving_images_fns = get_file_names(config.training_moving_images_dir, 100, 200)
-fixed_images_fns = get_file_names(config.training_fixed_images_dir, 0, 100)
+moving_images_fns = get_file_names(config.training_moving_images_dir)
+fixed_images_fns = get_file_names(config.training_fixed_images_dir)
 
 if path.isdir(config.training_saved_filename):
     print('loading saved data')
