@@ -1,3 +1,4 @@
+from os import makedirs, path
 import numpy as np
 from keras.models import Sequential, Model
 from keras.optimizers import SGD
@@ -123,7 +124,16 @@ class ssEMnet(object):
         results = (results + 1) * 0.5
         if not imageSink is None:
             for i in range(results.shape[0]):
+
+                if not path.isdir(imageSink + str(i)):
+                    makedirs(imageSink + str(i))
+                    
                 image = results[i][:, :, -1]
-                io.imsave(imageSink + "ssemnet_transformed_joe" +
-                          str(i) + ".png", image)
+                io.imsave(imageSink +
+                          str(i) + "/output.png", image)
+                moving_image = X1[i][:, :, -1]
+                fixed_image = X2[i][:, :, -1]
+                io.imsave(imageSink + str(i) + "/moving.png", moving_image)
+                io.imsave(imageSink + str(i) + "/fixed.png", fixed_image)
+
         return results
