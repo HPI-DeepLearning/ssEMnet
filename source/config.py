@@ -1,6 +1,6 @@
 from os import path
 
-dataset_name = 'mnist4'
+dataset_name = 'mnist'
 
 training_fixed_images_dir = path.join('data', dataset_name, 'training', 'fixed')
 training_moving_images_dir = path.join('data', dataset_name, 'training', 'moving')

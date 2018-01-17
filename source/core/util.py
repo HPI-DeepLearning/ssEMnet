@@ -20,9 +20,26 @@ def load_array(fname):
 
 
 def normalize(X):
+    X = X.astype('float32')
+    return X / (255 * 0.5) - 1
+    # for joe in X.flatten():
+        # if joe > 63000:
+            # print(joe)
+
+    mean = X.mean()
+    std = X.std()
+
+    print('mean: ', mean)
+    print('std: ', std)
+
+    print('min before: ', np.amin(X))
+    print('max before: ', np.amax(X))
+
     # Given a set of image data, normalize by subtracting by mean and dividing by the std
     X = X.astype('float32')
-    Xn = (X - X.mean()) / X.std()
+    Xn = (X - mean) / std
+    print('min: ', np.amin(Xn))
+    print('max: ', np.amax(Xn))
     Xn = Xn / np.amax(Xn)
     return Xn
 

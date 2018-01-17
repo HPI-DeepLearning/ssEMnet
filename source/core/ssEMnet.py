@@ -1,7 +1,7 @@
 from os import makedirs, path
 import numpy as np
 from keras.models import Sequential, Model
-from keras.optimizers import SGD
+from keras.optimizers import SGD, Adam
 from keras.layers import Input, Lambda
 from keras import backend as K
 from keras.callbacks import EarlyStopping, ModelCheckpoint
@@ -94,7 +94,7 @@ class ssEMnet(object):
                 l.set_weights(weights)
                 l.trainable = False  # Make encoder layers not trainable
 
-        model.compile(optimizer=SGD(lr=0.3),
+        model.compile(optimizer=Adam(lr=0.1),
                       loss=generic_unsupervised_loss,
                       loss_weights=[1., 0.0]) # ignores the loss of transformed image (the 2. output)
         model.summary()
@@ -121,7 +121,8 @@ class ssEMnet(object):
         [_, results] = model.predict([X1, X2], batch_size=1, verbose=1)
         results = results / \
             np.amax(abs(results))
-        results = (results + 1) * 0.5
+        # results = (results + 1) * 0.5
+        results = (results / 2) + 0.5
         if not imageSink is None:
             for i in range(results.shape[0]):
 

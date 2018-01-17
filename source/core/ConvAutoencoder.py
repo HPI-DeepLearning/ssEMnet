@@ -131,8 +131,10 @@ class ConvAutoEncoder2D(object):
         imgs_mask_test = np.swapaxes(imgs_mask_test, 0, 1)
         imgs_mask_test = np.swapaxes(imgs_mask_test, 1, 2)
 
-        # Since all the pixel values are between -1 and 1, map to be between 0 and 1.
-        imgs_mask_test = (imgs_mask_test / np.amax(imgs_mask_test) + 1) * 0.5
+        # Since all the pixel values are between - 1 and 1, map to be between 0 and 1.
+        imgs_mask_test = (imgs_mask_test / 2) + 0.5
+        # imgs_mask_test = imgs_mask_test * 255
+        # imgs_mask_test = imgs_mask_test.astype('int8')
         imgs_mask_test = np.swapaxes(imgs_mask_test, 2, 1)
         imgs_mask_test = np.swapaxes(imgs_mask_test, 1, 0)
         if not imageSink is None:
