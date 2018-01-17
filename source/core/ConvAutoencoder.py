@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from keras import regularizers
 from skimage import io
 
-from .MakeDataset import normalize
+from .util import normalize
 
 '''
 Module that introduces a convolutional autoencoder
@@ -36,13 +36,13 @@ class ConvAutoEncoder2D(object):
             names.append('encode_' + element)
         encoded = Conv2D(32, (3, 3), activation='relu', padding='same',
                          kernel_regularizer=regularizers.l2(1e-3), name=names[0])(inputs)
-        encoded = MaxPooling2D((2, 2), name=names[1])(encoded)
+        # encoded = MaxPooling2D((2, 2), name=names[1])(encoded)
         encoded = Conv2D(64, (3, 3), activation='relu', padding='same',
                          kernel_regularizer=regularizers.l2(1e-3), name=names[2])(encoded)
         encoded = MaxPooling2D((2, 2), name=names[3])(encoded)
         encoded = Conv2D(128, (3, 3), activation='relu', padding='same',
                          kernel_regularizer=regularizers.l2(1e-3), name=names[4])(encoded)
-        encoded = MaxPooling2D((2, 2), name=names[5])(encoded)
+        # encoded = MaxPooling2D((2, 2), name=names[5])(encoded)
         return encoded
 
     def decode(self, encoded_input):
@@ -53,20 +53,19 @@ class ConvAutoEncoder2D(object):
 
         decoded = Conv2D(128, (3, 3), activation='relu', padding='same',
                          kernel_regularizer=regularizers.l2(1e-3), name=names[0])(encoded_input)
-        decoded = UpSampling2D((2, 2), name=names[1])(decoded)
+        # decoded = UpSampling2D((2, 2), name=names[1])(decoded)
         decoded = Conv2D(64, (3, 3), activation='relu', padding='same',
                          kernel_regularizer=regularizers.l2(1e-3), name=names[2])(decoded)
-        decoded = UpSampling2D((2, 2), name=names[3])(decoded)
-        decoded = Conv2D(32, (3, 3), activation='relu', padding='same',
+        # decoded = UpSampling2D((2, 2), name=names[3])(decoded)
+        decoded = Conv2D(32, (5, 5), activation='relu', padding='same',
                          kernel_regularizer=regularizers.l2(1e-3), name=names[4])(decoded)
         decoded = UpSampling2D((2, 2), name=names[5])(decoded)
         decoded = Conv2D(1, (3, 3), activation='tanh', padding='same',
                          kernel_regularizer=regularizers.l2(1e-3), name=names[6])(decoded)
         return decoded
 
-
     def encode_2(self, inputs, layer_start_index):
-         # layer_starT_index is so we can identify the layers by name in ssSEMnet: input is the starting index for which we wish to name
+        # layer_starT_index is so we can identify the layers by name in ssSEMnet: input is the starting index for which we wish to name
         # e.g. layer_start_index = 1 --> the layers will be named encode1, encode2, ...etc
         indices = list(
             map(str, list(range(layer_start_index, layer_start_index + 2))))

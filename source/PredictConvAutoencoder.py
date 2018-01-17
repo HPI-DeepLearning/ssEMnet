@@ -2,7 +2,7 @@ import os
 import numpy as np
 
 from core.ConvAutoencoder import ConvAutoEncoder2D
-from core.MakeDataset import save_array, normalize, load_array
+from core.util import save_array, normalize, load_array
 import config
 
 if os.path.isdir(config.concatenated_filename):

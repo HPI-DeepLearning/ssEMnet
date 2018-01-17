@@ -1,14 +1,16 @@
 import numpy as np
-from .ConvAutoencoder import ConvAutoEncoder2D
-from .SpatialTransformNetwork import *
-from .objectives import generic_unsupervised_loss
-from .MakeDataset import *
 from keras.models import Sequential, Model
-from keras.optimizers import Adam
+from keras.optimizers import Adam, Nadam, SGD
 from keras.layers import Input, Lambda
 from keras import backend as K
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from skimage import io
+
+from .ConvAutoencoder import ConvAutoEncoder2D
+from .SpatialTransformNetwork import *
+from .objectives import generic_unsupervised_loss
+from .util import *
+
 
 '''
 Module that tries to replicate ssEMnet (use weights from trained autoencoder)
@@ -55,8 +57,7 @@ class ssEMnet(object):
 
         input1 = Input(self.input1_shape)
         input2 = Input(self.input2_shape)
-        x = SpatialTransformer(localization_net=self.locnet, output_size=self.input1_shape,
-                               input_shape=self.input1_shape, name='stm')(input1)
+        x = SpatialTransformer(input_shape=self.input1_shape, name='stm')(input1)
         g = ConvAutoEncoder2D(self.ModelFileAutoEncoder, x.get_shape().as_list()[
                               0], x.get_shape().as_list()[1])
         x1 = g.encode_2(x, 1)
@@ -88,7 +89,7 @@ class ssEMnet(object):
                 l.set_weights(weights)
                 l.trainable = False  # Make encoder layers not trainable
 
-        model.compile(optimizer=Adam(), loss=generic_unsupervised_loss)
+        model.compile(optimizer=Adam(lr=0.00001), loss=generic_unsupervised_loss)
         model.summary()
         return model
 
@@ -96,8 +97,7 @@ class ssEMnet(object):
         # Calculate the transformation of the moving images to the fixed images
 
         input1 = Input(self.input1_shape)
-        x = SpatialTransformer(localization_net=self.locnet, output_size=self.input1_shape,
-                               input_shape=self.input1_shape, name='stm')(input1)
+        x = SpatialTransformer(input_shape=self.input1_shape, name='stm')(input1)
         model = Model(input1, x)
         model.summary()
         return model
@@ -108,7 +108,7 @@ class ssEMnet(object):
         model = self.getssEMnet()
         model_checkpoint = ModelCheckpoint(
             self.ModelFile, monitor='val_loss', verbose=1, save_best_only=True, save_weights_only=True)
-        model.fit([X1, X2], np.zeros((X1.shape[0],)), batch_size=1, epochs=10,
+        model.fit([X1, X2], np.zeros((X1.shape[0],)), batch_size=1, epochs=20,
                   shuffle=True, verbose=1, validation_split=0.2, callbacks=[model_checkpoint])
 
     def predictModel(self, X1, imageSink):
