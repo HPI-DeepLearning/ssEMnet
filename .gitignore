@@ -111,3 +111,4 @@ venv.bak/
 data/saved
 checkpoints
 results
+data/mnist*
