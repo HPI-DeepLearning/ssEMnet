@@ -21,11 +21,8 @@ def load_array(fname):
 
 
 def normalize(X):
-    # X = X.astype('float32')
-    # return X / (255 * 0.5) - 1
-    # for joe in X.flatten():
-        # if joe > 63000:
-            # print(joe)
+    X = X.astype('float32')
+    return X / (255 * 0.5) - 1
 
     mean = X.mean()
     std = X.std()

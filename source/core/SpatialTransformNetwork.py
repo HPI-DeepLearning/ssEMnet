@@ -5,6 +5,8 @@ import tensorflow as tf
 import numpy as np
 
 # taken from https://github.com/HPI-DeepLearning/DIRNet/blob/master/DIRNet-mxnet/convnet.py#L209
+
+
 def identity_matrix_init(shape, dtype=None):
     return np.array([[1., 0, 0], [0, 1., 0]]).astype('float32').flatten()
 
@@ -18,7 +20,8 @@ def locNet(input_shape):
 
     locnet.add(Flatten())
     locnet.add(Dense(50, activation='relu', kernel_initializer='he_normal'))
-    locnet.add(Dense(6, kernel_initializer='zeros', bias_initializer=identity_matrix_init)) # initalize with ID matrix
+    locnet.add(Dense(6, kernel_initializer='zeros',
+                     bias_initializer=identity_matrix_init))  # initalize with ID matrix
     return locnet
 
 

@@ -62,10 +62,14 @@ class ssEMnet(object):
                                input_shape=self.input1_shape, name='stm')(input1)
         g = ConvAutoEncoder2D(self.ModelFileAutoEncoder, x.get_shape().as_list()[
                               0], x.get_shape().as_list()[1])
-        x1 = g.encode_2(x, 1)
 
-        # Produce feature map of target images
-        y = g.encode_2(input2, 7)
+        if config.encoding_decoding_choice is None:
+            x1 = g.encode(x, 1)
+            y = g.encode(input2, 7)
+        else:
+            x1 = g.encode_2(x, 1)
+            # Produce feature map of target images
+            y = g.encode_2(input2, 7)
 
         # Now we want to calculate the loss, we measure similarity between images. Should be scalar
         z = Lambda(mse_image_similarity)([x1, y])
@@ -74,14 +78,22 @@ class ssEMnet(object):
 
         # Placeholder for autoencoder so we can load the trained weights into our encoder
         # encode layers start naming at 1 and end at 6
-        autoencoder = Model(input1, g.decode_2(g.encode_2(input1, 1)))
-        #model.summary() # for debug
+
+        if config.encoding_decoding_choice is None:
+            autoencoder = Model(
+                        input1, g.decode(g.encode(input1, 1)))
+        else:
+            autoencoder = Model(
+                input1, g.decode_2(g.encode_2(input1, 1)))
+
+        # model.summary() # for debug
         autoencoder.load_weights(self.ModelFileAutoEncoder)
 
         # Now make weights untrainable in the encoder level
         for l in model.layers:
             if 'encode' in l.name:
-                i = int(l.name[7:]) # cut of chars to get the number of the encode layer
+                # cut of chars to get the number of the encode layer
+                i = int(l.name[7:])
                 print('Encode Index')
                 print(i)
 
@@ -94,9 +106,9 @@ class ssEMnet(object):
                 l.set_weights(weights)
                 l.trainable = False  # Make encoder layers not trainable
 
-        model.compile(optimizer=SGD(lr=0.000001),
+        model.compile(optimizer=SGD(lr=0.01),
                       loss=generic_unsupervised_loss,
-                      loss_weights=[1., 0.0]) # ignores the loss of transformed image (the 2. output)
+                      loss_weights=[1., 0.0])  # ignores the loss of transformed image (the 2. output)
         model.summary()
         return model
 
@@ -109,10 +121,11 @@ class ssEMnet(object):
             self.ModelFile, monitor='val_loss', verbose=1, save_best_only=True,
             save_weights_only=True)
         model.fit([X1, X2],
-            [np.zeros((X1.shape[0],)), np.zeros(X1.shape,)], # the first one is the distance between the images to optimise, the second the transformed image (ignored for loss)
-            batch_size=1,
-            epochs=50,
-            shuffle=False, verbose=1, validation_split=0.2, callbacks=[model_checkpoint])
+                  # the first one is the distance between the images to optimise, the second the transformed image (ignored for loss)
+                  [np.zeros((X1.shape[0],)), np.zeros(X1.shape,)],
+                  batch_size=1,
+                  epochs=10,
+                  shuffle=False, verbose=1, validation_split=0, callbacks=[model_checkpoint])
 
     def predict(self, X1, X2, imageSink):
         X1 = normalize(X1)
@@ -122,13 +135,12 @@ class ssEMnet(object):
         results = results / \
             np.amax(abs(results))
         results = (results + 1) * 0.5
-        # results = (results / 2) + 0.5
         if not imageSink is None:
             for i in range(results.shape[0]):
 
                 if not path.isdir(imageSink + str(i)):
                     makedirs(imageSink + str(i))
-                    
+
                 image = results[i][:, :, -1]
                 io.imsave(imageSink +
                           str(i) + "/output.png", image)

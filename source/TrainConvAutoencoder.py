@@ -1,6 +1,6 @@
 from os import path, makedirs
 import numpy as np
-from skimage import io
+from skimage import io, transform
 
 from scipy.misc import imread
 
@@ -10,35 +10,39 @@ import config
 
 import scipy.ndimage as ndimage
 
-# images
-moving_images_fns = get_file_names(config.training_moving_images_dir)
-fixed_images_fns = get_file_names(config.training_fixed_images_dir)
+# # images
+# moving_images_fns = get_file_names(config.training_moving_images_dir)
+# fixed_images_fns = get_file_names(config.training_fixed_images_dir)
 
-moving_images_fns = get_file_names('data/raw/mnist_png/training/1', 0, 100)
-fixed_images_fns = get_file_names('data/raw/mnist_png/training/1', 100, 200)
+moving_images_fns = get_file_names('data/raw/mnist_png/training/1', 0, 200)
+fixed_images_fns = get_file_names('data/raw/mnist_png/training/1', 200, 400)
+
+if config.encoding_decoding_choice is None:
+    size = 128
+else:
+    size = 28
 
 if False and path.isdir(config.training_saved_filename):
     print('loading saved data')
     X = load_array(config.training_saved_filename)
 else:
-    moving_images = np.empty((len(moving_images_fns), 28, 28))
+    moving_images = np.empty((len(moving_images_fns), size, size))
     for i in range(len(moving_images_fns)):
-        moving_images[i] = imread(
-            moving_images_fns[i], flatten=True, mode='L')
-        # moving_images[i] = io.imread(moving_images_fns[i], as_grey=True)
+        img = imread(moving_images_fns[i], flatten=True, mode='L')
 
-    fixed_images = np.empty((len(fixed_images_fns), 28, 28))
+        # moving_images[i] = transform.resize(img, (size, size))
+        moving_images[i] = img
+
+    fixed_images = np.empty((len(fixed_images_fns), size, size))
     for i in range(len(fixed_images_fns)):
-        fixed_images[i] = imread(fixed_images_fns[i], flatten=True, mode='L')
-        # fixed_images[i] = io.imread(fixed_images_fns[i], as_grey=True)
+        img = imread(fixed_images_fns[i], flatten=True, mode='L')
+
+        # fixed_images[i] = transform.resize(img, (size, size))
+        fixed_images[i] = img
+
 
     X = np.concatenate((moving_images, fixed_images), axis=0)
     X = np.expand_dims(X, axis=3)
-
-    # print(moving_images[0])
-    # print(moving_images[0].shape)
-
-    # io.imsave('fuck.png', moving_images[0])
 
     save_array(config.training_saved_filename, X)
 

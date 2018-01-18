@@ -2,8 +2,10 @@ from os import path
 
 dataset_name = 'mnist'
 
-training_fixed_images_dir = path.join('data', dataset_name, 'training', 'fixed')
-training_moving_images_dir = path.join('data', dataset_name, 'training', 'moving')
+training_fixed_images_dir = path.join(
+    'data', dataset_name, 'training', 'fixed')
+training_moving_images_dir = path.join(
+    'data', dataset_name, 'training', 'moving')
 
 saved_dir = path.join('data', 'saved',)
 training_saved_filename = path.join(
@@ -21,3 +23,4 @@ checkpoint_ssemnet_filename = path.join(
 image_sink = 'results/'
 
 encoding_decoding_choice = 1
+# encoding_decoding_choice = None

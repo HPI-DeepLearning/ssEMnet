@@ -74,7 +74,8 @@ class ConvAutoEncoder2D(object):
         for element in indices:
             names.append('encode_' + element)
 
-        encoded = Conv2D(32, (3, 3), activation='relu', padding='same',
+        # encoded = Conv2D(32, (3, 3), activation='relu', padding='same',
+        encoded = Conv2D(8, (2, 2), activation='relu', padding='same',
                          kernel_regularizer=regularizers.l2(1e-3), name=names[0])(inputs)
         encoded = MaxPooling2D((2, 2), name=names[1])(encoded)
         return encoded
@@ -85,10 +86,12 @@ class ConvAutoEncoder2D(object):
         for element in indices:
             names.append('decode_' + element)
 
-        decoded = Conv2D(128, (3, 3), activation='relu', padding='same',
+        # decoded = Conv2D(128, (3, 3), activation='relu', padding='same',
+        decoded = Conv2D(32, (2, 2), activation='relu', padding='same',
                          kernel_regularizer=regularizers.l2(1e-3), name=names[0])(encoded_input)
         decoded = UpSampling2D((2, 2), name=names[1])(decoded)
-        decoded = Conv2D(1, (3, 3), activation='tanh', padding='same',
+        # decoded = Conv2D(1, (3, 3), activation='tanh', padding='same',
+        decoded = Conv2D(1, (2, 2), activation='tanh', padding='same',
                          kernel_regularizer=regularizers.l2(1e-3), name=names[2])(decoded)
         # util.save_image('test', decoded)
         return decoded
