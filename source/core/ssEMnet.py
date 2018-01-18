@@ -7,9 +7,11 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 from skimage import io
 
 from .ConvAutoencoder import ConvAutoEncoder2D
-from .SpatialTransformNetwork import *
+from .SpatialAffineTransformNetwork import *
+from .SpatialDeformableTransformNetwork import *
 from .objectives import generic_unsupervised_loss
 from .util import *
+import config
 
 
 '''
@@ -55,9 +57,17 @@ class ssEMnet(object):
         # input1_shape = moving image (that which we are transforming)
         # input2_shape = fixed image (that which we are targeting to)
 
-        input1 = Input(self.input1_shape)
-        input2 = Input(self.input2_shape)
-        x = SpatialTransformer(input_shape=self.input1_shape, name='stm')(input1)
+        input1 = Input(shape=self.input1_shape)
+        input2 = Input(shape=self.input2_shape)
+        print("input1 shape yolo", self.input1_shape)
+        if config.st_choice == "affine":
+            x = SpatialAffineTransformer(localization_net=self.locnet, output_size=self.input1_shape,
+                               input_shape=self.input1_shape, name='stm')(input1)
+        else: #st_choice = deformable
+            x = SpatialDeformableTransformer(localization_net=self.locnet, output_size=self.input1_shape,
+                               input_shape=self.input1_shape, name='stm')(input1)
+
+
         g = ConvAutoEncoder2D(self.ModelFileAutoEncoder, x.get_shape().as_list()[
                               0], x.get_shape().as_list()[1])
         x1 = g.encode_2(x, 1)
@@ -68,7 +78,7 @@ class ssEMnet(object):
         # Now we want to calculate the loss, we measure similarity between images. Should be scalar
         z = Lambda(mse_image_similarity)([x1, y])
 
-        model = Model((input1, input2), z)
+        model = Model((input1, input2), (z, x))
 
         # Placeholder for autoencoder so we can load the trained weights into our encoder
         # encode layers start naming at 1 and end at 6
@@ -79,26 +89,23 @@ class ssEMnet(object):
         # Now make weights untrainable in the encoder level
         for l in model.layers:
             if 'encode' in l.name:
-                #print(l.name)
-                #i = int(l.name[6:])  # the number of the encode layer
-                i = int(l.name[7:])  # the number of the encode layer
-                #print(i)
+                i = int(l.name[7:]) # cut of chars to get the number of the encode layer
+                print('Encode Index')
+                print(i)
+
+                index_in_autoencoder = (i + 5) % 6 + 1
+                print(index_in_autoencoder)
+
                 autoencoder.summary()
                 weights = autoencoder.get_layer(
-                    'encode_' + str((i + 5) % 6 + 1)).get_weights()
+                    'encode_' + str(index_in_autoencoder)).get_weights()
                 l.set_weights(weights)
                 l.trainable = False  # Make encoder layers not trainable
 
-        model.compile(optimizer=Adam(lr=0.00001), loss=generic_unsupervised_loss)
-        model.summary()
-        return model
 
-    def getPredictNet(self):
-        # Calculate the transformation of the moving images to the fixed images
-
-        input1 = Input(self.input1_shape)
-        x = SpatialTransformer(input_shape=self.input1_shape, name='stm')(input1)
-        model = Model(input1, x)
+        model.compile(optimizer=Adam(lr=0.001),
+                      loss=generic_unsupervised_loss,
+                      loss_weights=[1., 0.0]) # ignores the loss of transformed image (the 2. output)
         model.summary()
         return model
 
@@ -107,38 +114,25 @@ class ssEMnet(object):
         X2 = normalize(X2)
         model = self.getssEMnet()
         model_checkpoint = ModelCheckpoint(
-            self.ModelFile, monitor='val_loss', verbose=1, save_best_only=True, save_weights_only=True)
-        model.fit([X1, X2], np.zeros((X1.shape[0],)), batch_size=1, epochs=20,
-                  shuffle=True, verbose=1, validation_split=0.2, callbacks=[model_checkpoint])
+            self.ModelFile, monitor='val_loss', verbose=1, save_best_only=True,
+            save_weights_only=True)
+        model.fit([X1, X2],
+            [np.zeros((X1.shape[0],)), np.zeros(X1.shape,)], # the first one is the distance between the images to optimize, the second the transformed image (ignored for loss)
+            batch_size=1,
+            epochs=20,
+            shuffle=False, verbose=1, validation_split=0.2, callbacks=[model_checkpoint])
 
-    def predictModel(self, X1, imageSink):
-        # Load weights of just the spatial transformer network
-        print("available images to predict: ", X1.shape)
-        model = self.getssEMnet()
-        model.load_weights(self.ModelFile)
-
-        predicted = self.getPredictNet()
-        # Load the appropriate weights into the spatial transformer layer
-        stm_weights = model.get_layer('stm').get_weights()
-
-        #print('stm_weights: ', stm_weights)
-        print('stm_weights length: ', len(stm_weights))
-        predicted.get_layer('stm').set_weights(stm_weights)
-
+    def predict(self, X1, X2, imageSink):
         X1 = normalize(X1)
-        transformed_images = predicted.predict(X1, batch_size=1, verbose=1)
-        #print('transformed_images: ', transformed_images)
-        print('transformed_images length: ', len(transformed_images))
-        transformed_images = transformed_images / \
-            np.amax(abs(transformed_images))
-        transformed_images = (transformed_images + 1) * 0.5
-        #transformed_images = np.swapaxes(transformed_images, 0, 1)
-        #transformed_images = np.swapaxes(transformed_images, 1, 2)
-        #print("transformed images shape", transformed_images.shape)
+        X2 = normalize(X2)
+        model = self.getssEMnet()
+        [_, results] = model.predict([X1, X2], batch_size=1, verbose=1)
+        results = results / \
+            np.amax(abs(results))
+        results = (results + 1) * 0.5
         if not imageSink is None:
-
-            for i in range(transformed_images.shape[0]):
-                image = transformed_images[i][:, :, -1]
-                io.imsave(imageSink + "ssemnet_transformed" + str(i) + ".png", image)
-
-        return transformed_images
+            for i in range(results.shape[0]):
+                image = results[i][:, :, -1]
+                io.imsave(imageSink + "ssemnet_transformed" +
+                          str(i) + ".png", image)
+        return results

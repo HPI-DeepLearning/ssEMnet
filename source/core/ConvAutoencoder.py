@@ -115,7 +115,7 @@ class ConvAutoEncoder2D(object):
         model_checkpoint = ModelCheckpoint(
             self.ModelFile, monitor='val_loss', verbose=1, save_best_only=True, save_weights_only=True)
         # X is the input and also the output
-        model.fit(X, X, batch_size=1, epochs=10, shuffle=True, verbose=1,
+        model.fit(X, X, batch_size=1, epochs=10, shuffle=False, verbose=1,
                   validation_split=0.2, callbacks=[model_checkpoint])
 
     def predictModel(self, datas, imageSink=None):

@@ -13,20 +13,32 @@ def bicubic_interp_2d(input_, new_size):
     ref : http://blog.demofox.org/2015/08/15/resizing-images-with-bicubic-interpolation/
     """
     shape = input_.get_shape().as_list()
-    print("input shape", shape)
+    print("bicubic input shape", shape)
+    print("bicubic input new_size", new_size)
     #self.x = tf.placeholder(tf.float32, im_shape)
     #self.y = tf.placeholder(tf.float32, im_shape)
     #self.xy = tf.concat([self.x, self.y], 3)
 
+    '''
     batch_size = shape[0]
     height = shape[1]
     width = shape[2]
     channel = shape[3]
-    #batch_size = tf.placeholder(tf.float32, 200)
-    #height = tf.placeholder(tf.float32, config.image_height)
-    #width = tf.placeholder(tf.float32, config.image_width)
-    #channel = tf.placeholder(tf.float32, 1)
+    '''
 
+
+    batch_size = config.num_samples
+    height = config.image_height
+    width = config.image_width
+    channel = config.image_depth
+
+
+    '''
+    batch_size = tf.placeholder(tf.float32, 200)
+    height = tf.placeholder(tf.float32, config.image_height)
+    width = tf.placeholder(tf.float32, config.image_width)
+    channel = tf.placeholder(tf.float32, 1)
+    '''
 
     def _hermite(A, B, C, D, t):
         a = A * -0.5 + B * 1.5 + C * -1.5 + D * 0.5

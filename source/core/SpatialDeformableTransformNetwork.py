@@ -1,26 +1,47 @@
-om keras.layers.core import Layer
+#with identity initalization and deformable ST
+
+from keras.layers.core import Layer
 from keras.layers import MaxPooling2D, Conv2D, Dense, Activation, Flatten, Input
 from keras.models import Sequential
 import tensorflow as tf
+import numpy as np
 
 from .bicubic_interp import bicubic_interp_2d
 import config
 
+# taken from https://github.com/HPI-DeepLearning/DIRNet/blob/master/DIRNet-mxnet/convnet.py#L209
+def identity_matrix_init(shape, dtype=None):
+    return np.array([[1., 0, 0], [0, 1., 0]]).astype('float32').flatten()
 
 def locNet(input_shape):
+    '''
     locnet = Sequential()
-    locnet.add(MaxPooling2D(pool_size=(2, 2), input_shape=input_shape))
-    locnet.add(Conv2D(8, (3, 3), kernel_initializer='he_normal'))
+    locnet.add(Conv2D(6, (3, 3), activation='relu', kernel_initializer='he_normal', input_shape=input_shape))
     locnet.add(MaxPooling2D(pool_size=(2, 2)))
-    locnet.add(Conv2D(8, (3, 3), kernel_initializer='he_normal'))
+    locnet.add(Conv2D(64, (3, 3), activation='relu', kernel_initializer='he_normal'))
+    locnet.add(Conv2D(128, (3, 3), kernel_initializer='he_normal'))
+    locnet.add(MaxPooling2D(pool_size=(2, 2)))
+    #locnet.add(Conv2D(6, (3, 3), kernel_initializer='he_normal'))
+    locnet.add(Conv2D(2, (3, 3), kernel_initializer='he_normal'))
+    '''
+    locnet = Sequential()
+    #locnet.add(MaxPooling2D(pool_size=(2, 2), input_shape=input_shape))
+    locnet.add(Conv2D(8, (3, 3), kernel_initializer='he_normal', input_shape=input_shape))
+    #locnet.add(MaxPooling2D(pool_size=(2, 2)))
+    #locnet.add(Conv2D(64, (3, 3), kernel_initializer='he_normal'))
+    #locnet.add(MaxPooling2D(pool_size=(2, 2)))
+    #locnet.add(Conv2D(8, (3, 3), kernel_initializer='he_normal'))
+    #locnet.add(MaxPooling2D(pool_size=(2, 2)))
+    #locnet.add(Conv2D(256, (3, 3), kernel_initializer='he_normal'))
 
-    locnet.add(Flatten())
-    locnet.add(Dense(50, activation='relu', kernel_initializer='he_normal'))
-    locnet.add(Dense(6, kernel_initializer='he_normal'))
+    #locnet.add(Flatten())
+    #locnet.add(Dense(50, activation='relu', kernel_initializer='he_normal'))
+    ## locnet.add(Dense(6, kernel_initializer='he_normal'))
+    #locnet.add(Dense(6, kernel_initializer='zeros', bias_initializer=identity_matrix_init))  # initalize with ID matrix
     return locnet
 
 
-class SpatialTransformer(Layer):
+class SpatialDeformableTransformer(Layer):
     """Spatial Transformer Layer
     Implements a spatial transformer layer as described in [1]_.
     Borrowed from [2]_:
@@ -47,32 +68,43 @@ class SpatialTransformer(Layer):
                  **kwargs):
         self.locnet = localization_net
         self.output_size = output_size
-        super(SpatialTransformer, self).__init__(**kwargs)
+        super(SpatialDeformableTransformer, self).__init__(**kwargs)
 
     def build(self, input_shape):
         self.locnet.build(input_shape)
         self.trainable_weights = self.locnet.trainable_weights
+
+        # Be sure to call this somewhere!
+        # from: https://keras.io/layers/writing-your-own-keras-layers/
+        super(SpatialDeformableTransformer, self).build(input_shape)
+
         # self.regularizers = self.locnet.regularizers //NOT SUER ABOUT THIS, THERE IS NO MORE SUCH PARAMETR AT self.locnet
         #self.constraints = self.locnet.constraints #TODO: einkommentieren und fixen
 
     def compute_output_shape(self, input_shape):
         output_size = self.output_size
+        print("input_shape for comp out: ", input_shape)
+        print("output_shape in comp out: ", output_size)
         return (None,
                 int(output_size[0]),
                 int(output_size[1]),
                 int(input_shape[-1]))
 
+
     def call(self, X, mask=None):
-        print("todo: X shape is: ", X.shape)
-        affine_transformation = self.locnet.call(X)
+
+        print("call X shape is: ", X.shape)
+        trans_params = self.locnet.call(X)
+        print("deformable transformation from call", trans_params)
 
         # X should be num_img, height, width, depth
-        self.x = tf.placeholder(tf.float32, config.img_shape)
-        self.y = tf.placeholder(tf.float32, config.img_shape)
-        self.xy = tf.concat([self.x, self.y], 3)
+        #self.x = tf.placeholder(tf.float32, config.img_shape)
+        #self.y = tf.placeholder(tf.float32, config.img_shape)
+        #self.xy = tf.concat([self.x, self.y], 3)
 
-
-        output = self._transform(affine_transformation, self.xy, self.output_size)
+        #X_new = tf.placeholder(tf.float32, [config.num_samples, config.image_height, config.image_depth, 2])
+        print("out size is: ", self.output_size)
+        output = self._transform(trans_params, X, self.output_size)
         return output
 
     def _repeat(self, x, n_repeats):
@@ -162,6 +194,7 @@ class SpatialTransformer(Layer):
         return grid
 
     def _transform(self, V, U, out_size):
+        print("transform input", tf.shape(U))
         num_batch = tf.shape(U)[0]
         height = tf.shape(U)[1]
         width = tf.shape(U)[2]
