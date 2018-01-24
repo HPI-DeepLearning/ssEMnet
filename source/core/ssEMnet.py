@@ -127,7 +127,7 @@ class ssEMnet(object):
                   epochs=10,
                   shuffle=False, verbose=1, validation_split=0, callbacks=[model_checkpoint])
 
-    def predict(self, X1, X2, imageSink):
+    def predict(self, X1, X2, index, imageSink):
         X1 = normalize(X1)
         X2 = normalize(X2)
         model = self.getssEMnet()
@@ -137,16 +137,13 @@ class ssEMnet(object):
         results = (results + 1) * 0.5
         if not imageSink is None:
             for i in range(results.shape[0]):
-
-                if not path.isdir(imageSink + str(i)):
-                    makedirs(imageSink + str(i))
-
                 image = results[i][:, :, -1]
+                makedirs(imageSink + str(index))
                 io.imsave(imageSink +
-                          str(i) + "/output.png", image)
+                          str(index) + "/output.png", image)
                 moving_image = X1[i][:, :, -1]
                 fixed_image = X2[i][:, :, -1]
-                io.imsave(imageSink + str(i) + "/moving.png", moving_image)
-                io.imsave(imageSink + str(i) + "/fixed.png", fixed_image)
+                io.imsave(imageSink + str(index) + "/moving.png", moving_image)
+                io.imsave(imageSink + str(index) + "/fixed.png", fixed_image)
 
         return results

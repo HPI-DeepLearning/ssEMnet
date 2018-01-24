@@ -1,11 +1,14 @@
 from os import path
 
-dataset_name = 'mnist'
+dataset_name = 'mnist_full'
+size = 28
+
+limit = 200
 
 training_fixed_images_dir = path.join(
-    'data', dataset_name, 'training', 'fixed')
+    'data', dataset_name, 'training', '0')
 training_moving_images_dir = path.join(
-    'data', dataset_name, 'training', 'moving')
+    'data', dataset_name, 'training', '0')
 
 saved_dir = path.join('data', 'saved',)
 training_saved_filename = path.join(

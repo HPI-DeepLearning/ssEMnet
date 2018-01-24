@@ -1,35 +1,40 @@
-import config
-from core.ssEMnet import ssEMnet
-from core.util import read_array_from_file, get_file_names
-
-from scipy.misc import imread
-
-import numpy as np
 '''
 Trains a ssEMnet to do 2D affine co-registration 
 '''
 
-# X1, X2 = read_array_from_file(config.training_saved_filename)
+import numpy as np
+from scipy.misc import imread
 
-moving_images_fns = get_file_names('data/raw/mnist_png/training/1', 0, 1)
-fixed_images_fns = get_file_names('data/raw/mnist_png/training/1', 1, 2)
+import config
+from core.ssEMnet import ssEMnet
+from core import util
 
-moving_images = np.empty((len(moving_images_fns), 28, 28))
-for i in range(len(moving_images_fns)):
-    img = imread(moving_images_fns[i], flatten=True, mode='L')
-    moving_images[i] = img
+# 0, id=5 for fixed
 
-fixed_images = np.empty((len(fixed_images_fns), 28, 28))
-for i in range(len(fixed_images_fns)):
-    img = imread(fixed_images_fns[i], flatten=True, mode='L')
-    fixed_images[i] = img
+moving_images_fns = util.get_file_names(config.training_moving_images_dir)
+fixed_images_fns = util.get_file_names('data/mnist_full/training/0', 5, 6)
 
-moving_images = np.expand_dims(moving_images, axis=3)
-fixed_images = np.expand_dims(fixed_images, axis=3)
+fixed = util.read_image('data/mnist_full/training/0/56.png')
 
-net = ssEMnet(moving_images.shape[1:], fixed_images.shape[1:],
-              config.checkpoint_autoencoder_filename, config.checkpoint_ssemnet_filename)
+# X1, X2 = util.split_array(util.get_image_array())
 
-net.train(moving_images, fixed_images)
+# print(X1.shape)
+# print(X1[1:].shape)
 
-net.predict(moving_images, fixed_images, imageSink=config.image_sink)
+for index, m in enumerate(moving_images_fns):
+    moving = util.read_image(m)
+
+    net = ssEMnet((config.size, config.size, 1), (config.size, config.size, 1),
+                config.checkpoint_autoencoder_filename, config.checkpoint_ssemnet_filename)
+
+    moving_a = np.empty_like([moving])
+    moving_a = np.expand_dims(moving_a, axis=3)
+
+    fixed_a = np.empty_like([fixed])
+    fixed_a = np.expand_dims(fixed_a, axis=3)
+
+    net.train(fixed_a, moving_a)
+    # net.train(moving_a, fixed_a)
+
+    net.predict(fixed_a, moving_a, index, imageSink=config.image_sink)
+    # net.predict(moving_a, fixed_a, index, imageSink=config.image_sink)
